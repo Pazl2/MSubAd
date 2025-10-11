@@ -112,8 +112,35 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.nav-menu a:hover {
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+}
+
 .cabinet-link {
     font-weight: 700;
+}
+
+.menu-logo-container {
+    display: none; /* Скрыт в десктопной версии */
+    width: 100%;
+    border-bottom: 2px solid var(--white); /* Белая разделительная линия под контейнером */
+}
+
+.menu-logo-container a:hover {
+  background-color: var(--white);
+}
+
+.menu-logo-link {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap; /* Запрещаем перенос на новую строку */
+    text-decoration: none;
+    background-color: var(--white);
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--white); /* Белая разделительная линия под логотипом */
 }
 
 .menu-logo {
