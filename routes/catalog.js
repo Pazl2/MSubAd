@@ -15,7 +15,7 @@ router.get('/line/:id', async (req, res) => {
   if (!line) {
     return res.render('catalog', { error: 'Линия не найдена', lines: await Line.findAll({ order: [['id','ASC']] }), title: 'Обзор станций', selectedAds: false });
   }
-  const stations = await MetroStation.findAll({ where: { lineId: line.id }, order: [['id','ASC']] });
+  const stations = await MetroStation.findAll({ where: { line_id: line.id }, order: [['id','ASC']] });
   const lines = await Line.findAll({ order: [['id','ASC']] });
   res.render('catalog', { lines, stations, selectedLine: line, title: line.name, selectedAds: false, station: null, ads: null });
 });

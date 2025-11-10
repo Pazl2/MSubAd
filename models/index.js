@@ -8,8 +8,8 @@ const MetroStation = require('./metroStations')(sequelize, DataTypes);
 const AdType = require('./adType')(sequelize, DataTypes);
 
 // Associations
-Line.hasMany(MetroStation, { foreignKey: 'lineId' });
-MetroStation.belongsTo(Line, { foreignKey: 'lineId' });
+Line.hasMany(MetroStation, { foreignKey: 'line_id' });
+MetroStation.belongsTo(Line, { foreignKey: 'line_id' });
 
 module.exports = {
   sequelize,

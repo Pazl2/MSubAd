@@ -8,7 +8,7 @@ module.exports = (sequelize) => {
     passenger_flow: { type: DataTypes.INTEGER, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
     location: { type: DataTypes.STRING, allowNull: false },
-    lineId: { type: DataTypes.BIGINT, allowNull: true }
+    line_id: { type: DataTypes.BIGINT, allowNull: true }
   }, {
     tableName: 'metro_stations',
     timestamps: false
