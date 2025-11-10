@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Регистрация - MSubAd</title>
+  <link rel="stylesheet" href="/static/css/header.css" />
+  <link rel="stylesheet" href="/static/css/footer.css" />
+  <link rel="stylesheet" href="/static/css/login.css" />
+</head>
+<body>
+  <header><%- include('blocks/header') %></header>
+
+  <% if (query && query.error) { %>
+    <div class="alert error">❌ Такой пользователь уже существует.</div>
+  <% } %>
+
+  <div class="login-container">
+    <div class="login-box">
+      <h2>Регистрация</h2>
+      <form action="/register" method="POST">
+        <div class="form-group"><label for="username">Логин:</label><input type="text" id="username" name="username" required></div>
+        <div class="form-group"><label for="email">Email:</label><input type="email" id="email" name="email" required></div>
+        <div class="form-group"><label for="first_name">Имя:</label><input type="text" id="first_name" name="first_name" required></div>
+        <div class="form-group"><label for="last_name">Фамилия:</label><input type="text" id="last_name" name="last_name" required></div>
+        <div class="form-group"><label for="father_name">Отчество:</label><input type="text" id="father_name" name="father_name" required></div>
+        <div class="form-group"><label for="phone">Номер телефона:</label><input type="text" id="phone" name="phone" required></div>
+        <div class="form-group"><label for="password">Пароль:</label><input type="password" id="password" name="password" required></div>
+        <button type="submit" class="login-button">Зарегистрироваться</button>
+      </form>
+      <div class="login-links"><a href="/login">Уже есть аккаунт?</a></div>
+    </div>
+  </div>
+
+  <footer><%- include('blocks/footer') %></footer>
+</body>
+</html>

@@ -1,0 +1,204 @@
+/* cabinet.css */
+
+/* ================================
+   Общие стили для личного кабинета
+================================ */
+body{
+    margin: 0px
+}
+
+.cabinet-layout {
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    min-height: calc(100vh - 300px); /* Учитывая хедер и футер */
+        background:
+            linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)),
+            url('../images/background.jpg') center/cover no-repeat fixed;
+}
+
+.cabinet-sidebar {
+    width: 250px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-right: 2px solid #c62828;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeInLeft 0.8s ease;
+}
+
+.cabinet-main {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.cabinet-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    padding: 40px;
+    min-width: 900px;
+    width: 100%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border: 2px solid #c62828;
+    animation: fadeInUp 0.8s ease;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.content-header h2 {
+    font-size: 1.8rem;
+    color: #c62828;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.user-welcome {
+    font-size: 1.1rem;
+    color: #444;
+    font-weight: 600;
+}
+
+.moder-badge {
+    background: #c62828;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(198, 40, 40, 0.2);
+}
+
+.cabinet-info-large {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.info-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.info-section:hover {
+    box-shadow: 0 0px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.info-section h3 {
+    font-size: 1.4rem;
+    color: #c62828;
+    margin-bottom: 20px;
+    font-weight: 700;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 0.95rem;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: #222;
+    background: #f8f8f8;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+/* ================================
+   Анимации
+================================ */
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================================
+   Адаптивность
+================================ */
+@media (max-width: 1024px) {
+    .cabinet-layout {
+        flex-direction: column;
+    }
+
+    .cabinet-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid #c62828;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    .cabinet-main {
+        padding: 20px;
+    }
+
+    .cabinet-content {
+        padding: 30px;
+    }
+
+    .content-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .cabinet-content {
+        padding: 20px;
+        border-radius: 15px;
+    }
+
+    .info-section h3 {
+        font-size: 1.2rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}

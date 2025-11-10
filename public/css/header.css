@@ -1,0 +1,180 @@
+/* ================================
+   HEADER — строгий и современный стиль
+================================ */
+.header-wrapper {
+    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;  /* Или ваш шрифт */
+    color: #222;  /* Если нужно */
+    line-height: 1.6;  /* Если нужно */
+    margin: 0;
+    padding: 0;
+}
+
+.header-wrapper .navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 10px 30px;
+    position: relative;
+    z-index: 10;
+    border-bottom: 3px solid #c62828;
+}
+
+/* Логотип и название */
+.header-wrapper .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-wrapper .logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #c62828;
+    font-weight: 700;
+    font-size: 1.4rem;
+}
+
+.header-wrapper .logo {
+    height: 45px;
+    border-radius: 8px;
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+}
+
+.header-wrapper .logo:hover {
+    transform: scale(1.05);
+}
+
+.header-wrapper .site-title {
+    font-size: 1.2rem;
+    color: #c62828;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Декоративные окна "поезда" */
+.header-wrapper .decor-container {
+    display: flex;
+    gap: 10px;
+}
+
+.header-wrapper .decor-window {
+    width: 28px;
+    height: 18px;
+    background-color: #c62828;
+    border-radius: 3px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);
+}
+
+.header-wrapper .mobile-decor-container {
+    display: none;
+}
+
+/* Навигация */
+.header-wrapper .nav-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 25px;
+}
+
+.header-wrapper .nav-menu li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    font-size: 1rem;
+}
+
+.header-wrapper .nav-menu li a:hover {
+    color: #c62828;
+}
+
+.header-wrapper .cabinet-link {
+    background-color: #c62828;
+    color: #fff !important;
+    padding: 8px 16px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.header-wrapper .cabinet-link:hover {
+    background-color: #a91f1f;
+    transform: translateY(-2px);
+}
+
+/* Кнопка меню для мобильных */
+.header-wrapper .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #c62828;
+    transition: transform 0.3s ease;
+}
+
+.header-wrapper .menu-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* Мобильная версия */
+@media (max-width: 900px) {
+    .header-wrapper .decor-container {
+        display: none;
+    }
+
+    .header-wrapper .mobile-decor-container {
+        display: flex;
+        gap: 8px;
+    }
+
+    .header-wrapper .nav-menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        right: 0;
+        width: 250px;
+        background-color: #fff;
+        border-top: 2px solid #c62828;
+        box-shadow: -2px 6px 10px rgba(0,0,0,0.15);
+        padding: 20px 0;
+        z-index: 999;
+    }
+
+    .header-wrapper .nav-menu.active {
+        display: flex;
+    }
+
+    .header-wrapper .nav-menu li {
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    .header-wrapper .menu-toggle {
+        display: block;
+    }
+
+    .header-wrapper .menu-logo-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .header-wrapper .menu-logo {
+        height: 35px;
+        margin-right: 8px;
+        border-radius: 6px;
+    }
+
+    .header-wrapper .menu-site-title {
+        color: #c62828;
+        font-weight: 700;
+    }
+}

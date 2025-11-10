@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= title || 'Обзор станций' %></title>
+  <link rel="stylesheet" href="/static/css/header.css" />
+  <link rel="stylesheet" href="/static/css/footer.css" />
+  <link rel="stylesheet" href="/static/css/catalog.css" />
+</head>
+<body>
+  <header><%- include('blocks/header') %></header>
+
+  <main class="catalog-container">
+    <div class="ads-wrapper <%= selectedAds ? 'shift-left' : '' %>">
+      <div class="advertising-buttons <%= !selectedAds ? 'wide' : '' %>">
+        <a href="/catalog/ads?location=true" class="ad-btn full train-ad"><span class="ad-icon">🚇</span><span class="ad-text">Реклама в поезде</span></a>
+        <a href="/catalog/ads?location=false" class="ad-btn full station-ad"><span class="ad-icon">🏛️</span><span class="ad-text">Реклама в метро</span></a>
+      </div>
+
+      <% if (selectedAds) { %>
+        <div class="ads-panel">
+          <div class="ads-container" id="ads-container">
+            <% if (ads && ads.length) { %>
+              <% ads.forEach(function(ad) { %>
+                <div class="ad-card">
+                  <h4><%= ad.name %></h4>
+                  <p><%= ad.description %></p>
+                  <p><strong>Размер:</strong> <%= ad.width %>x<%= ad.height %></p>
+                  <p><strong>Цена:</strong> <%= ad.base_price %></p>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <p>Рекламных позиций не найдено.</p>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <h2 style="text-align:center">Обзор станций</h2>
+    <div class="line-buttons">
+      <% if (lines) { lines.forEach(function(line){ %>
+        <a href="/catalog/line/<%= line.id %>" class="line-btn" style="background-color:<%= line.color_code %>"><%= line.name %></a>
+      <% }) } %>
+    </div>
+
+    <% if (stations) { %>
+      <section>
+        <h3>Станции линии: <%= selectedLine.name %></h3>
+        <div class="station-carousel" style="background-color:<%= selectedLine.color_code %>">
+          <% stations.forEach(function(station){ %>
+            <a href="/catalog/station/<%= station.id %>" class="carousel-item"><%= station.name %></a>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
+
+    <% if (station) { %>
+      <section class="station-details">
+        <h3 style="color:<%= station.Line ? station.Line.color_code : '#000' %>"><%= station.name %></h3>
+        <p><strong>Номер станции:</strong> <%= station.id %></p>
+        <p><strong>Год открытия:</strong> <%= station.opening_year %></p>
+        <p><strong>Пассажиропоток:</strong> <%= station.passenger_flow %></p>
+        <p><strong>Описание:</strong> <%= station.description %></p>
+        <p><strong>Локация:</strong> <%= station.location %></p>
+        <p><strong>Линия:</strong> <%= station.Line ? station.Line.name : '' %></p>
+      </section>
+    <% } %>
+
+    <% if (error) { %><p style="color:red;"><%= error %></p><% } %>
+  </main>
+
+  <script src="/static/js/catalog.js"></script>
+  <footer><%- include('blocks/footer') %></footer>
+</body>
+</html>

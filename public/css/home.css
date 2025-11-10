@@ -1,0 +1,180 @@
+/* ================================
+   Общие стили
+================================ */
+body {
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #222;
+    background:
+        linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)),
+        url('../images/background.jpg') center/cover no-repeat fixed;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Основной контейнер */
+main {
+    flex: 1;
+}
+
+/* ================================
+   HERO-СЕКЦИЯ
+================================ */
+.hero {
+    text-align: center;
+    padding: 100px 20px 120px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(6px);
+    border-radius: 20px;
+    margin: 60px auto;
+    max-width: 1000px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    animation: fadeInUp 0.8s ease;
+    border: 2px solid #c62828;
+}
+
+.hero h2 {
+    font-size: 2rem;
+    color: #c62828;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.hero p {
+    max-width: 750px;
+    margin: 0 auto 40px;
+    font-size: 1.1rem;
+    color: #444;
+    line-height: 1.7;
+}
+
+/* CTA — кнопка */
+.cta-button {
+    display: inline-block;
+    background-color: #c62828;
+    color: #fff;
+    text-decoration: none;
+    padding: 14px 36px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 15px rgba(198, 40, 40, 0.3);
+}
+
+.cta-button:hover {
+    background-color: #a91f1f;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(198, 40, 40, 0.4);
+}
+
+/* ================================
+   FEATURES
+================================ */
+.features {
+    text-align: center;
+    padding: 80px 20px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(6px);
+    margin: 40px auto;
+    border-radius: 20px;
+    max-width: 1200px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    border: 2px solid #c62828;
+}
+
+.features h3 {
+    font-size: 1.8rem;
+    color: #c62828;
+    margin-bottom: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* Сетка преимуществ */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.feature-card {
+    background-color: #fff;
+    padding: 30px 25px;
+    border-radius: 16px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border-top: 4px solid #c62828;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border-top-color: #a91f1f;
+}
+
+.feature-card h4 {
+    color: #c62828;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.feature-card p {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* ================================
+   Анимации
+================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================================
+   Адаптивность
+================================ */
+@media (max-width: 768px) {
+    .hero {
+        padding: 60px 20px 80px;
+        margin: 30px 10px;
+    }
+
+    .hero h2 {
+        font-size: 1.6rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    .cta-button {
+        padding: 12px 28px;
+        font-size: 1rem;
+    }
+
+    .features {
+        padding: 60px 15px;
+    }
+
+    .features h3 {
+        font-size: 1.5rem;
+        margin-bottom: 30px;
+    }
+
+    .feature-card {
+        padding: 25px 20px;
+    }
+}

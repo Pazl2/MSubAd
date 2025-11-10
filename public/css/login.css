@@ -1,0 +1,183 @@
+/* ================================
+   Общие стили
+================================ */
+body {
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #222;
+    background:
+        linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)),
+        url('../images/background.jpg') center/cover no-repeat fixed;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Основной контейнер */
+main {
+    flex: 1;
+}
+
+/* ================================
+   LOGIN-СЕКЦИЯ
+================================ */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 80px 20px;
+    min-height: calc(100vh - 300px); /* Учитывая хедер и футер */
+}
+
+.login-box {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    padding: 40px 50px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 2px solid #c62828;
+    text-align: center;
+    animation: fadeInUp 0.8s ease;
+}
+
+.login-box h2 {
+    font-size: 1.8rem;
+    color: #c62828;
+    margin-bottom: 30px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Форма */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1rem;
+    color: #444;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    border-color: #c62828;
+    box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.2);
+    outline: none;
+}
+
+/* Кнопка входа */
+.login-button {
+    display: block;
+    width: 100%;
+    background-color: #c62828;
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 15px rgba(198, 40, 40, 0.3);
+    margin-top: 20px;
+}
+
+.login-button:hover {
+    background-color: #a91f1f;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(198, 40, 40, 0.4);
+}
+
+/* Ссылки */
+.login-links {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+    font-size: 0.95rem;
+}
+
+.login-links a {
+    color: #c62828;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.login-links a:hover {
+    color: #a91f1f;
+    text-decoration: underline;
+}
+
+/* ================================
+   Анимации
+================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================================
+   Адаптивность
+================================ */
+@media (max-width: 768px) {
+    .login-box {
+        padding: 30px 35px;
+        margin: 0 15px;
+    }
+
+    .login-box h2 {
+        font-size: 1.5rem;
+    }
+
+    .login-button {
+        padding: 12px;
+        font-size: 1rem;
+    }
+
+    .login-links {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
+.alert {
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.alert.success {
+    background: #c8e6c9;
+    border-left: 5px solid #2e7d32;
+    color: #2e7d32;
+}
+
+.alert.error {
+    background: #ffcdd2;
+    border-left: 5px solid #c62828;
+    color: #c62828;
+}

@@ -1,0 +1,194 @@
+.cabinet-header-wrapper {
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    color: #222;
+    line-height: 1.6;
+        background:
+            linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)),
+            url('../images/background.jpg') center/cover no-repeat fixed;
+    margin: 0;
+    padding: 0;
+}
+
+/* ================================
+   Стили для панели навигации
+================================ */
+.cabinet-header-wrapper .cabinet-nav {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+    width: 280px; /* Увеличена ширина меню */
+    min-width: 280px; /* Минимальная ширина */
+}
+
+.cabinet-header-wrapper .nav-header {
+    margin-bottom: 20px;
+}
+
+.cabinet-header-wrapper .nav-header h3 {
+    font-size: 1.4rem;
+    color: #c62828;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 2px solid #c62828;
+    padding-bottom: 10px;
+}
+
+.cabinet-header-wrapper .nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+}
+
+.cabinet-header-wrapper .nav-item {
+    margin-bottom: 10px;
+}
+
+.cabinet-header-wrapper .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px; /* Увеличены отступы */
+    color: #444;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem; /* Увеличен размер шрифта */
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.cabinet-header-wrapper .nav-link:hover {
+    background: rgba(198, 40, 40, 0.1);
+    color: #c62828;
+    transform: translateX(5px);
+}
+
+.cabinet-header-wrapper .nav-link.active {
+    background: #c62828;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(198, 40, 40, 0.2);
+}
+
+.cabinet-header-wrapper .nav-link.active:hover {
+    background: #a91f1f;
+    color: #fff;
+}
+
+.cabinet-header-wrapper .nav-icon {
+    margin-right: 12px; /* Увеличен отступ для иконок */
+    font-size: 1.3rem; /* Увеличен размер иконок */
+}
+
+.cabinet-header-wrapper .moderator-section {
+    color: #444;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem; /* Увеличен размер шрифта */
+}
+
+.cabinet-header-wrapper .section-label {
+    font-size: 0.95rem; /* Увеличен размер шрифта */
+    color: #666;
+    font-weight: 600;
+    padding: 12px 15px; /* Увеличены отступы */
+    background: #f0f0f0;
+    border-radius: 8px;
+}
+
+.cabinet-header-wrapper .logout-item {
+    margin-top: auto;
+}
+
+.cabinet-header-wrapper .logout-form {
+    margin: 0;
+}
+
+.cabinet-header-wrapper .logout-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: #c62828;
+    color: #fff;
+    border: none;
+    padding: 12px 18px; /* Увеличены отступы */
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.05rem; /* Увеличен размер шрифта */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(198, 40, 40, 0.2);
+}
+
+.cabinet-header-wrapper .logout-button:hover {
+    background-color: #a91f1f;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(198, 40, 40, 0.3);
+}
+
+/* ================================
+   Адаптивность
+================================ */
+@media (max-width: 1024px) {
+    .cabinet-header-wrapper .cabinet-nav {
+        flex-direction: row;
+        height: auto;
+        overflow-x: auto;
+        padding: 10px;
+        justify-content: flex-start;
+        width: auto; /* Автоматическая ширина в мобильной версии */
+        min-width: auto;
+    }
+
+    .cabinet-header-wrapper .nav-menu {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .cabinet-header-wrapper .nav-item {
+        margin-bottom: 0;
+    }
+
+    .cabinet-header-wrapper .nav-header {
+        display: none;
+    }
+
+    .cabinet-header-wrapper .moderator-section {
+        margin-top: 0;
+        margin-left: 10px;
+    }
+
+    .cabinet-header-wrapper .logout-item {
+        margin-top: 0;
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .cabinet-header-wrapper .nav-link {
+        padding: 10px 15px; /* Сохранены увеличенные отступы */
+        font-size: 1rem; /* Сохранен увеличенный размер шрифта */
+    }
+
+    .cabinet-header-wrapper .nav-icon {
+        font-size: 1.2rem; /* Сохранен увеличенный размер иконок */
+    }
+
+    .cabinet-header-wrapper .logout-button {
+        padding: 10px 15px; /* Сохранены увеличенные отступы */
+        font-size: 1rem; /* Сохранен увеличенный размер шрифта */
+    }
+}
+
+/* Дополнительные медиа-запросы для очень широких экранов */
+@media (min-width: 1440px) {
+    .cabinet-header-wrapper .cabinet-nav {
+        width: 320px; /* Еще больше на широких экранах */
+        min-width: 320px;
+    }
+
+    .cabinet-header-wrapper .nav-link {
+        padding: 14px 20px;
+        font-size: 1.1rem;
+    }
+}

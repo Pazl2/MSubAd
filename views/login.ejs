@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Авторизация - MSubAd</title>
+  <link rel="stylesheet" href="/static/css/header.css" />
+  <link rel="stylesheet" href="/static/css/footer.css" />
+  <link rel="stylesheet" href="/static/css/login.css" />
+</head>
+<body>
+  <header><%- include('blocks/header') %></header>
+
+  <div class="login-container">
+    <div class="login-box">
+      <h2>Авторизация</h2>
+      <form action="/login" method="POST">
+        <div class="form-group">
+          <label for="username">Логин:</label>
+          <input type="text" id="username" name="username" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Пароль:</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+        <button type="submit" class="login-button">Войти</button>
+      </form>
+      <div class="login-links"><a href="/register">Регистрация</a></div>
+    </div>
+  </div>
+
+  <% if (query && query.success) { %>
+    <div class="alert success">✅ Регистрация успешна! Войдите в аккаунт.</div>
+  <% } %>
+
+  <% if (query && query.error) { %>
+    <div class="alert error">❌ Неверный логин или пароль.</div>
+  <% } %>
+
+  <footer><%- include('blocks/footer') %></footer>
+</body>
+</html>
