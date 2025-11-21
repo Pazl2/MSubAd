@@ -4,19 +4,19 @@
             <h3>Меню</h3>
         </div>
         <ul class="nav-menu">
-            <li class="nav-item"><a href="/cabinet" class="nav-link active"><span class="nav-icon">👤</span>Аккаунт</a></li>
+            <li class="nav-item"><a href="/cabinet" class="nav-link active" onclick="showAccount(); return false;"><span class="nav-icon">👤</span>Аккаунт</a></li>
             <li class="nav-item"><a href="/create-ad" class="nav-link"><span class="nav-icon">🎨</span>Создание рекламы</a></li>
             <li class="nav-item"><a href="/order-ad" class="nav-link"><span class="nav-icon">📦</span>Заказ рекламы</a></li>
 
             <% if (user && user.is_moder) { %>
                 <li class="nav-item moderator-section"><span class="section-label">Модерация</span></li>
-                <li class="nav-item"><a href="/manage-users" class="nav-link"><span class="nav-icon">👥</span>Управление пользователями</a></li>
+                <li class="nav-item"><a href="/manage-users" class="nav-link" onclick="showManageUsers(); return false;"><span class="nav-icon">👥</span>Управление пользователями</a></li>
                 <li class="nav-item"><a href="/moderate-ads" class="nav-link"><span class="nav-icon">✅</span>Проверка рекламы</a></li>
             <% } %>
 
             <li class="nav-item logout-item">
                 <form action="/logout" method="POST" class="logout-form">
-                    <button type="submit" class="nav-link logout-button"><span class="nav-icon">🚪</span>Выйти</button>
+                    <button type="submit" class="logout-button"><span class="nav-icon">🚪</span>Выйти</button>
                 </form>
             </li>
         </ul>

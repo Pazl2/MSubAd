@@ -19,17 +19,20 @@ body{
 }
 
 .cabinet-sidebar {
-    width: 250px;
+    width: 350px;
+    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
     border-right: 2px solid #c62828;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     animation: fadeInLeft 0.8s ease;
+    overflow-y: auto;
 }
 
 .cabinet-main {
     flex: 1;
     padding: 40px;
+    padding-left: 40px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -40,7 +43,8 @@ body{
     backdrop-filter: blur(8px);
     border-radius: 20px;
     padding: 40px;
-    min-width: 900px;
+    min-width: 600px;
+    max-width: 1400px;
     width: 100%;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     border: 2px solid #c62828;
@@ -81,15 +85,15 @@ body{
 .cabinet-info-large {
     display: flex;
     flex-direction: column;
-    gap: 30px;
 }
 
 .info-section {
     background: #fff;
     border-radius: 12px;
-    padding: 20px;
+    padding: 5px 20px 20px 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    border-top: 4px solid #c62828;
 }
 
 .info-section:hover {
@@ -109,7 +113,7 @@ body{
 .info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
+    gap: 30px;
 }
 
 .info-item {
@@ -131,6 +135,164 @@ body{
     padding: 8px 12px;
     border-radius: 6px;
     border: 1px solid #ddd;
+}
+
+.edit-button {
+    background-color: #c62828;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(198, 40, 40, 0.2);
+    margin-top: 20px;
+    align-self: flex-start;
+}
+
+.edit-button:hover {
+    background-color: #a91f1f;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(198, 40, 40, 0.3);
+}
+
+.edit-input {
+    font-size: 1rem;
+    color: #222;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 2px solid #ddd;
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    transition: border-color 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #c62828;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.confirm-button {
+    background-color: #c62828;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(198, 40, 40, 0.2);
+}
+
+.confirm-button:hover {
+    background-color: #a91f1f;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(198, 40, 40, 0.3);
+}
+
+.cancel-button {
+    background-color: #999;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+    background-color: #777;
+}
+
+.error-message {
+    color: #c62828;
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 5px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-label {
+    font-size: 0.95rem;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.form-input,
+.form-select {
+    font-size: 1rem;
+    color: #222;
+    background: #fff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 2px solid #ddd;
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    transition: border-color 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #c62828;
+}
+
+.delete-button {
+    background-color: #d32f2f;
+}
+
+.delete-button:hover {
+    background-color: #b71c1c;
+}
+
+.button-download-wrapper {
+    margin-bottom: 20px;
+}
+
+.download-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #4caf50;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+}
+
+.download-button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
+}
+
+.download-icon {
+    font-size: 1.2rem;
 }
 
 /* ================================
@@ -201,4 +363,14 @@ body{
     .info-grid {
         grid-template-columns: 1fr;
     }
+}
+
+#editMode {
+    display: flex;
+    flex-direction: column;
+}
+
+#editMode .cabinet-info-large {
+    display: flex;
+    flex-direction: column;
 }

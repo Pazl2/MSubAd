@@ -17,8 +17,10 @@
     flex-direction: column;
     height: 100%;
     padding: 20px;
-    width: 280px; /* Увеличена ширина меню */
-    min-width: 280px; /* Минимальная ширина */
+    width: 350px; /* Увеличена ширина меню */
+    min-width: 350px; /* Минимальная ширина */
+    background: #ffffff; /* Белый фон для меню навигации */
+    box-sizing: border-box;
 }
 
 .cabinet-header-wrapper .nav-header {
@@ -55,6 +57,8 @@
     font-size: 1.05rem; /* Увеличен размер шрифта */
     border-radius: 8px;
     transition: all 0.3s ease;
+    width: 100%; /* Кнопки не должны превышать ширину меню */
+    box-sizing: border-box; /* Учитываем отступы и границы в общей ширине */
 }
 
 .cabinet-header-wrapper .nav-link:hover {
@@ -117,6 +121,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(198, 40, 40, 0.2);
+    box-sizing: border-box; /* Учитываем отступы и границы в общей ширине */
 }
 
 .cabinet-header-wrapper .logout-button:hover {
@@ -130,37 +135,37 @@
 ================================ */
 @media (max-width: 1024px) {
     .cabinet-header-wrapper .cabinet-nav {
-        flex-direction: row;
-        height: auto;
-        overflow-x: auto;
-        padding: 10px;
-        justify-content: flex-start;
-        width: auto; /* Автоматическая ширина в мобильной версии */
-        min-width: auto;
+        flex-direction: column;
+        height: 100%;
+        width: 350px !important;
+        min-width: 350px !important;
+        padding: 20px;
+        overflow: visible !important;
+        border-right: 2px solid #c62828;
     }
 
     .cabinet-header-wrapper .nav-menu {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         gap: 10px;
     }
 
     .cabinet-header-wrapper .nav-item {
-        margin-bottom: 0;
+        margin-bottom: 10px;
     }
 
     .cabinet-header-wrapper .nav-header {
-        display: none;
+        display: block;
     }
 
     .cabinet-header-wrapper .moderator-section {
-        margin-top: 0;
-        margin-left: 10px;
+        margin-top: 20px;
+        margin-left: 0;
     }
 
     .cabinet-header-wrapper .logout-item {
-        margin-top: 0;
-        margin-left: auto;
+        margin-top: auto;
+        margin-left: 0;
     }
 }
 
@@ -183,8 +188,8 @@
 /* Дополнительные медиа-запросы для очень широких экранов */
 @media (min-width: 1440px) {
     .cabinet-header-wrapper .cabinet-nav {
-        width: 320px; /* Еще больше на широких экранах */
-        min-width: 320px;
+        width: 350px;
+        min-width: 350px;
     }
 
     .cabinet-header-wrapper .nav-link {

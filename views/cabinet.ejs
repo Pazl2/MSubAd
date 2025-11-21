@@ -18,7 +18,7 @@
     <div class="cabinet-main">
       <div class="cabinet-content">
         <div class="content-header">
-            <h2>Личный кабинет</h2>
+            <h2 id="pageTitle">Личный кабинет</h2>
             <div class="user-welcome">
                 Добро пожаловать, <span><%= user.first_name %> <%= user.last_name %></span>!
                 <% if (user.is_moder) { %>
@@ -27,22 +27,23 @@
             </div>
         </div>
 
-        <div class="cabinet-info-large">
+        <!-- Account View Mode -->
+        <div class="cabinet-info-large" id="viewMode">
           <div class="info-section">
             <h3>Основная информация</h3>
             <div class="info-grid">
               <div class="info-item"><span class="info-label">Логин:</span><span class="info-value"><%= user.username %></span></div>
-              <div class="info-item"><span class="info-label">Имя:</span><span class="info-value"><%= user.first_name %></span></div>
-              <div class="info-item"><span class="info-label">Фамилия:</span><span class="info-value"><%= user.last_name %></span></div>
-              <div class="info-item"><span class="info-label">Отчество:</span><span class="info-value"><%= user.father_name %></span></div>
+              <div class="info-item"><span class="info-label">Имя:</span><span class="info-value" id="view-first_name"><%= user.first_name %></span></div>
+              <div class="info-item"><span class="info-label">Фамилия:</span><span class="info-value" id="view-last_name"><%= user.last_name %></span></div>
+              <div class="info-item"><span class="info-label">Отчество:</span><span class="info-value" id="view-father_name"><%= user.father_name %></span></div>
             </div>
           </div>
 
           <div class="info-section">
             <h3>Контактная информация</h3>
             <div class="info-grid">
-              <div class="info-item"><span class="info-label">Email:</span><span class="info-value"><%= user.email %></span></div>
-              <div class="info-item"><span class="info-label">Телефон:</span><span class="info-value"><%= user.phone %></span></div>
+              <div class="info-item"><span class="info-label">Email:</span><span class="info-value" id="view-email"><%= user.email %></span></div>
+              <div class="info-item"><span class="info-label">Телефон:</span><span class="info-value" id="view-phone"><%= user.phone %></span></div>
             </div>
           </div>
 
@@ -53,11 +54,294 @@
               <div class="info-item"><span class="info-label">Статус:</span><span class="info-value"><%= user.is_moder ? 'Модератор' : 'Пользователь' %></span></div>
             </div>
           </div>
+
+          <button class="edit-button" onclick="toggleEditMode()">Редактировать</button>
+        </div>
+
+        <!-- Account Edit Mode -->
+        <form id="editMode" style="display: none;" onsubmit="saveChanges(event)">
+          <div class="cabinet-info-large">
+            <div class="info-section">
+              <h3>Основная информация</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Логин:</span>
+                  <span class="info-value"><%= user.username %></span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Имя:</span>
+                  <input type="text" name="first_name" value="<%= user.first_name %>" class="edit-input" required>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Фамилия:</span>
+                  <input type="text" name="last_name" value="<%= user.last_name %>" class="edit-input" required>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Отчество:</span>
+                  <input type="text" name="father_name" value="<%= user.father_name %>" class="edit-input" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-section">
+              <h3>Контактная информация</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Email:</span>
+                  <input type="email" name="email" value="<%= user.email %>" class="edit-input" required>
+                  <span class="error-message" id="email-error"></span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Телефон:</span>
+                  <input type="text" name="phone" value="<%= user.phone %>" class="edit-input" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-section">
+              <h3>Информация об аккаунте</h3>
+              <div class="info-grid">
+                <div class="info-item"><span class="info-label">Дата регистрации:</span><span class="info-value"><%= new Date(user.registration_date).toLocaleString('ru-RU') %></span></div>
+                <div class="info-item"><span class="info-label">Статус:</span><span class="info-value"><%= user.is_moder ? 'Модератор' : 'Пользователь' %></span></div>
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button type="submit" class="confirm-button">Подтвердить</button>
+              <button type="button" class="cancel-button" onclick="toggleEditMode()">Отмена</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- User Management -->
+        <div id="manageUsersMode" style="display: none;">
+          <div class="cabinet-info-large">
+            <div class="button-download-wrapper">
+              <button type="button" class="download-button" onclick="downloadUsersDatabase()">
+                <span class="download-icon">📥</span>Скачать базу данных
+              </button>
+            </div>
+
+            <div class="info-section">
+              <h3>Изменить роль</h3>
+              <div class="form-group">
+                <label class="form-label">Логин пользователя:</label>
+                <input type="text" id="changeRoleUsername" class="form-input" placeholder="Введите логин">
+                <label class="form-label">Новая роль:</label>
+                <select id="roleSelect" class="form-select">
+                  <option value="user">Пользователь</option>
+                  <option value="moderator">Модератор</option>
+                </select>
+                <button type="button" class="confirm-button" onclick="changeUserRole()">Изменить</button>
+                <span class="error-message" id="changeRoleError"></span>
+              </div>
+            </div>
+
+            <div class="info-section">
+              <h3>Удалить пользователя</h3>
+              <div class="form-group">
+                <label class="form-label">Логин пользователя:</label>
+                <input type="text" id="deleteUsername" class="form-input" placeholder="Введите логин">
+                <button type="button" class="confirm-button delete-button" onclick="deleteUser()">Удалить</button>
+                <span class="error-message" id="deleteUserError"></span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <footer><%- include('blocks/footer') %></footer>
+
+  <script>
+    function toggleEditMode() {
+      const viewMode = document.getElementById('viewMode');
+      const editMode = document.getElementById('editMode');
+      
+      if (viewMode.style.display === 'none') {
+        viewMode.style.display = 'block';
+        editMode.style.display = 'none';
+      } else {
+        viewMode.style.display = 'none';
+        editMode.style.display = 'block';
+      }
+    }
+
+    function saveChanges(event) {
+      event.preventDefault();
+      const emailInput = document.querySelector('input[name="email"]');
+      const emailError = document.getElementById('email-error');
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailInput.value)) {
+        emailError.textContent = 'Некорректный формат email';
+        return;
+      }
+      emailError.textContent = '';
+
+      const formData = {
+        first_name: document.querySelector('input[name="first_name"]').value,
+        last_name: document.querySelector('input[name="last_name"]').value,
+        father_name: document.querySelector('input[name="father_name"]').value,
+        email: emailInput.value,
+        phone: document.querySelector('input[name="phone"]').value
+      };
+
+      fetch('/cabinet/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('view-first_name').textContent = formData.first_name;
+          document.getElementById('view-last_name').textContent = formData.last_name;
+          document.getElementById('view-father_name').textContent = formData.father_name;
+          document.getElementById('view-email').textContent = formData.email;
+          document.getElementById('view-phone').textContent = formData.phone;
+          toggleEditMode();
+          alert('Данные успешно обновлены');
+        } else {
+          alert('Ошибка: ' + data.message);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Ошибка при сохранении');
+      });
+    }
+
+    function showManageUsers() {
+      document.getElementById('viewMode').style.display = 'none';
+      document.getElementById('editMode').style.display = 'none';
+      document.getElementById('manageUsersMode').style.display = 'block';
+      document.getElementById('pageTitle').textContent = 'Управление пользователями';
+      updateNavLink('manage-users');
+    }
+
+    function showAccount() {
+      document.getElementById('viewMode').style.display = 'block';
+      document.getElementById('editMode').style.display = 'none';
+      document.getElementById('manageUsersMode').style.display = 'none';
+      document.getElementById('pageTitle').textContent = 'Личный кабинет';
+      updateNavLink('account');
+    }
+
+    function updateNavLink(page) {
+      const links = document.querySelectorAll('.cabinet-nav .nav-link');
+      links.forEach(link => link.classList.remove('active'));
+      
+      if (page === 'account') {
+        // Ищем первую ссылку в меню (Аккаунт)
+        const accountLink = document.querySelector('.cabinet-nav .nav-menu .nav-item:first-child .nav-link');
+        if (accountLink) {
+          accountLink.classList.add('active');
+        }
+      } else if (page === 'manage-users') {
+        // Ищем ссылку управления пользователями по onclick атрибуту или классу
+        const manageLink = Array.from(links).find(link => link.textContent.includes('Управление пользователями'));
+        if (manageLink) {
+          manageLink.classList.add('active');
+        }
+      }
+    }
+
+    function changeUserRole() {
+      const username = document.getElementById('changeRoleUsername').value.trim();
+      const role = document.getElementById('roleSelect').value;
+      const errorEl = document.getElementById('changeRoleError');
+      errorEl.textContent = '';
+
+      if (!username) {
+        errorEl.textContent = 'Введите логин пользователя';
+        return;
+      }
+
+      if (role === 'moderator') {
+        if (!confirm('Вы уверены, что хотите дать этому пользователю права модератора?')) {
+          return;
+        }
+      }
+
+      fetch('/cabinet/change-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, role })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          document.getElementById('changeRoleUsername').value = '';
+        } else {
+          errorEl.textContent = data.message;
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        errorEl.textContent = 'Ошибка сервера';
+      });
+    }
+
+    function deleteUser() {
+      const username = document.getElementById('deleteUsername').value.trim();
+      const errorEl = document.getElementById('deleteUserError');
+      errorEl.textContent = '';
+
+      if (!username) {
+        errorEl.textContent = 'Введите логин пользователя';
+        return;
+      }
+
+      if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+        return;
+      }
+
+      fetch('/cabinet/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          document.getElementById('deleteUsername').value = '';
+        } else {
+          errorEl.textContent = data.message;
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        errorEl.textContent = 'Ошибка сервера';
+      });
+    }
+
+    function downloadUsersDatabase() {
+      fetch('/cabinet/download-users')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Ошибка при скачивании');
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'users_database.xlsx';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Ошибка при скачивании базы данных');
+        });
+    }
+  </script>
 </body>
 </html>
