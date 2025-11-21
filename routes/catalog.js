@@ -1,52 +1,73 @@
+// routes/catalog.js
 const express = require('express');
 const { Line, MetroStation, AdType } = require('../models');
 const router = express.Router();
 
-// main catalog page - overview lines
+const defaultRenderParams = {
+  title: 'Обзор станций',
+  selectedAds: false,
+  stations: null,
+  station: null,
+  selectedLine: null,
+  ads: null,
+  error: null
+};
+
+// Main catalog page - initial render (lines list)
 router.get('/', async (req, res) => {
-  const lines = await Line.findAll({ order: [['id','ASC']] });
-  res.render('catalog', { lines, title: 'Обзор станций', selectedAds: false, stations: null, station: null, selectedLine: null, ads: null });
+  try {
+    const lines = await Line.findAll({ order: [['id','ASC']] });
+    res.render('catalog', { ...defaultRenderParams, lines });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('catalog', { ...defaultRenderParams, lines: [], error: 'Ошибка сервера' });
+  }
 });
 
-// view line
-router.get('/line/:id', async (req, res) => {
-  const id = req.params.id;
-  const line = await Line.findByPk(id);
-  if (!line) {
-    return res.render('catalog', { error: 'Линия не найдена', lines: await Line.findAll({ order: [['id','ASC']] }), title: 'Обзор станций', selectedAds: false });
+/*
+  JSON API endpoints used by frontend JS.
+  They return JSON only and are intended for AJAX.
+*/
+
+// GET /catalog/api/line/:id  -> { line: {...}, stations: [...] }
+router.get('/api/line/:id', async (req, res) => {
+  try {
+    const line = await Line.findByPk(req.params.id);
+    if (!line) return res.status(404).json({ error: 'Линия не найдена' });
+
+    const stations = await MetroStation.findAll({ where: { line_id: line.id }, order: [['id','ASC']] });
+    res.json({ line, stations });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Ошибка при получении линии' });
   }
-  const stations = await MetroStation.findAll({ where: { line_id: line.id }, order: [['id','ASC']] });
-  const lines = await Line.findAll({ order: [['id','ASC']] });
-  res.render('catalog', { lines, stations, selectedLine: line, title: line.name, selectedAds: false, station: null, ads: null });
 });
 
-// view station
-router.get('/station/:id', async (req, res) => {
-  const id = req.params.id;
-  const station = await MetroStation.findByPk(id, { include: Line });
-  if (!station) {
-    return res.render('catalog', { error: 'Станция не найдена', lines: await Line.findAll({ order: [['id','ASC']] }), title: 'Обзор станций', selectedAds: false });
+// GET /catalog/api/station/:id  -> { station: {...} }
+router.get('/api/station/:id', async (req, res) => {
+  try {
+    const station = await MetroStation.findByPk(req.params.id, { include: Line });
+    if (!station) return res.status(404).json({ error: 'Станция не найдена' });
+    res.json({ station });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Ошибка при получении станции' });
   }
-  const lines = await Line.findAll({ order: [['id','ASC']] });
-  res.render('catalog', { lines, station, title: station.name, selectedAds: false, stations: null, selectedLine: null, ads: null });
 });
 
-// view ads with optional filter ?location=true/false
-// This route also supports AJAX: if Accept: application/json -> returns JSON
-router.get('/ads', async (req, res) => {
-  const locationParam = req.query.location;
-  let ads;
-  if (typeof locationParam !== 'undefined') {
-    const loc = (locationParam === 'true' || locationParam === '1' || locationParam === 'on');
-    ads = await AdType.findAll({ where: { location: loc }, order: [['id', 'ASC']] });
-  } else {
-    ads = await AdType.findAll({ order: [['id','ASC']] });
+// GET /catalog/api/ads?location=true|false  -> { ads: [...] }
+router.get('/api/ads', async (req, res) => {
+  try {
+    const { location } = req.query;
+    const where = typeof location !== 'undefined'
+      ? { location: ['true', '1', 'on'].includes(location) }
+      : undefined;
+    const ads = await AdType.findAll({ where, order: [['id', 'ASC']] });
+    res.json({ ads });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Ошибка при получении рекламы' });
   }
-  const lines = await Line.findAll({ order: [['id','ASC']] });
-  if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-    return res.json({ ads });
-  }
-  res.render('catalog', { ads, selectedAds: true, lines, title: 'Реклама', stations: null, station: null, selectedLine: null });
 });
 
 module.exports = router;

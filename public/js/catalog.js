@@ -1,219 +1,244 @@
+// static/js/catalog.js
 class CatalogManager {
-    constructor() {
-        this.elements = {
-            errorDiv: document.getElementById('error-message'),
-            adsPanel: document.getElementById('ads-panel'),
-            stationsSection: document.getElementById('stations-section'),
-            stationSection: document.getElementById('station-section'),
-            adsWrapper: document.querySelector('.ads-wrapper'),
-            advertisingButtons: document.querySelector('.advertising-buttons'),
-            backButton: document.getElementById('back-to-ads-btn'),
-            adsContainer: document.getElementById('ads-container')
-        };
-        
-        this.activeAdButton = null;
-        this.init();
+  constructor() {
+    this.el = {
+      adsMetro: document.getElementById('ads-metro-container'),
+      adsTrain: document.getElementById('ads-train-container'),
+      linesWrap: document.getElementById('line-buttons'),
+      stationsSection: document.getElementById('stations-section'),
+      stationCarousel: document.getElementById('station-carousel'),
+      stationSection: document.getElementById('station-section'),
+      selectedLineName: document.getElementById('selected-line-name'),
+      error: document.getElementById('error-message'),
+      stationName: document.getElementById('station-name'),
+      stationId: document.getElementById('station-id'),
+      stationYear: document.getElementById('station-opening-year'),
+      stationFlow: document.getElementById('station-passenger-flow'),
+      stationDesc: document.getElementById('station-description'),
+      stationLocation: document.getElementById('station-location'),
+      stationLine: document.getElementById('station-line')
+    };
+    this.init();
+  }
+
+  init(){
+    this.bind();
+    this.loadAds();
+    // hide station UI
+    if (this.el.stationsSection) this.el.stationsSection.style.display = 'none';
+    if (this.el.stationSection) this.el.stationSection.style.display = 'none';
+
+    // search/filter elements
+    this.searchInput = document.getElementById('ads-search');
+    if (this.searchInput) this.searchInput.addEventListener('input', ()=> this.filterAds());
+  }
+
+  bind(){
+    document.addEventListener('click', (e)=>{
+      const lineBtn = e.target.closest('[data-tab="line"]');
+      if(lineBtn){
+        e.preventDefault();
+        const id = lineBtn.getAttribute('data-line-id');
+        if(id) this.loadLine(id);
+        return;
+      }
+      const stationBtn = e.target.closest('.carousel-item');
+      if (stationBtn){
+        const sid = stationBtn.getAttribute('data-station-id');
+        if(sid) this.loadStation(sid);
+      }
+    });
+  }
+
+  async loadAds(){
+    // concurrent load
+    await Promise.all([
+      this.fetchAndRenderAds(false, this.el.adsMetro),
+      this.fetchAndRenderAds(true, this.el.adsTrain),
+    ]);
+  }
+
+  async fetchAndRenderAds(location, container){
+    if(!container) return;
+    container.innerHTML = '<div class="ad-loading">Загрузка...</div>';
+    try{
+      const res = await fetch(`/catalog/api/ads?location=${location}`, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw new Error('Ошибка загрузки');
+      const data = await res.json();
+      this.renderAds(container, data.ads || []);
+    }catch(err){
+      console.error(err);
+      container.innerHTML = '<div class="ad-error">Не удалось загрузить объявления</div>';
     }
+  }
 
-    init() {
-        this.bindEvents();
-        this.addClickOutsideListener();
+  renderAds(container, ads){
+    if(!ads || !ads.length){
+      container.innerHTML = '<div class="ad-empty">Рекламных позиций не найдено.</div>';
+      return;
     }
+    container.innerHTML = ads.map((a, idx) => {
+      const price = a.base_price != null ? `${this.escape(a.base_price)} ₽` : 'Свяжитесь';
+      // --- Новый блок для placeholder ---
+      let imgBlock;
+      if (a.image_url) {
+        imgBlock = `<div class="ad-card__img" style="background-image:url('${this.escape(a.image_url)}')" role="img" aria-label="${this.escape(a.name)}"></div>`;
+      } else {
+        // Пропорциональное масштабирование
+        let w = parseInt(a.width) || 100, h = parseInt(a.height) || 50;
+        const maxSide = 180;
+        let scale = Math.min(maxSide / w, maxSide / h, 1);
+        let svgW = Math.round(w * scale), svgH = Math.round(h * scale);
+        let sizeText = `${this.escape(a.width||'-')}×${this.escape(a.height||'-')}`;
+        imgBlock = `
+          <div class="ad-card__img ad-card__img--placeholder" aria-hidden="true" style="display:flex;align-items:center;justify-content:center;">
+            <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="background:#f5f5f5;border-radius:6px;">
+              <rect x="0" y="0" width="${svgW}" height="${svgH}" rx="8" fill="#fdecea" stroke="#c62828" stroke-width="2"/>
+              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="18" fill="#c62828" font-family="Segoe UI, Arial" font-weight="bold">${sizeText}</text>
+            </svg>
+          </div>
+        `;
+      }
+      // add data attributes for client-side filtering
+      const loc = a.location ? 'train' : 'metro';
+      const searchText = this.escape((a.name || '') + ' ' + (a.description || ''));
+      return `
+        <article class="ad-card" tabindex="0" style="animation-delay:${idx * 40}ms" data-location="${loc}" data-search="${searchText}">
+          ${imgBlock}
+          <div class="ad-card__body">
+            <div class="ad-card__meta">
+              <h3 class="ad-card__title">${this.escape(a.name)}</h3>
+            </div>
+            <p class="ad-card__desc">${this.escape(a.description||'')}</p>
+            <div class="ad-card__footer">
+              <div class="ad-card__price">${price}</div>
+            </div>
+            <div class="ad-card__actions"><button class="btn btn--ghost" type="button">Заказать</button></div>
+          </div>
+        </article>
+      `;
+    }).join('');
 
-    bindEvents() {
-        // Делегирование событий для динамических элементов
-        document.addEventListener('click', (e) => {
-            const target = e.target.closest('[data-tab="ads"]');
-            if (target) {
-                this.handleAdButtonClick(target);
-                return;
-            }
+    // after render, apply filter (in case user typed search earlier)
+    this.filterAds();
+  }
 
-            const lineBtn = e.target.closest('.line-btn');
-            if (lineBtn) {
-                this.handleLineButtonClick(lineBtn);
-                return;
-            }
-
-            const stationBtn = e.target.closest('.carousel-item');
-            if (stationBtn) {
-                this.handleStationButtonClick(stationBtn);
-            }
-        });
-
-        this.elements.backButton.addEventListener('click', () => this.resetAdsView());
-    }
-
-    addClickOutsideListener() {
-        document.addEventListener('click', (e) => {
-            const { adsPanel, backButton } = this.elements;
-            const isAdButton = e.target.closest('[data-tab="ads"]');
-            const isBackButton = e.target.closest('#back-to-ads-btn');
-            
-            if (!adsPanel.contains(e.target) && !isAdButton && !isBackButton && 
-                adsPanel.classList.contains('show')) {
-                this.resetAdsView();
-            }
-        });
-    }
-
-    handleAdButtonClick(button) {
-        if (this.activeAdButton === button) {
-            this.resetAdsView();
-            return;
-        }
-
-        this.setActiveAdButton(button);
-        const location = button.getAttribute('data-location') === 'true';
-        this.loadAds(location);
-    }
-
-    setActiveAdButton(button) {
-        if (this.activeAdButton) {
-            this.activeAdButton.classList.remove('active');
-        }
-        this.activeAdButton = button;
-        button.classList.add('active');
-    }
-
-    async loadAds(location) {
-        this.hideSections();
-        this.showAdsPanel();
-
-        try {
-            const url = `/catalog/api/ads?location=${location}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            this.renderAds(data.ads);
-        } catch (error) {
-            this.showError('Ошибка загрузки рекламы');
-        }
-    }
-
-    renderAds(ads) {
-        if (ads && ads.length) {
-            this.elements.adsContainer.innerHTML = ads.map(ad => `
-                <div class="ad-card">
-                    <h4>${ad.name}</h4>
-                    <p>${ad.description}</p>
-                    <p><strong>Размер:</strong> ${ad.width}x${ad.height}</p>
-                    <p><strong>Цена:</strong> ${ad.base_price}</p>
-                </div>
-            `).join('');
+  filterAds(){
+    const q = (this.searchInput && this.searchInput.value || '').trim().toLowerCase();
+    const containers = [this.el.adsMetro, this.el.adsTrain];
+    containers.forEach(cont => {
+      if (!cont) return;
+      const cards = cont.querySelectorAll('.ad-card');
+      let visibleCount = 0;
+      cards.forEach(card => {
+        const text = (card.getAttribute('data-search') || '').toLowerCase();
+        const matchesQuery = !q || text.indexOf(q) !== -1;
+        if (matchesQuery) {
+          card.style.display = '';
+          visibleCount++;
         } else {
-            this.elements.adsContainer.innerHTML = '<p>Рекламных позиций не найдено.</p>';
+          card.style.display = 'none';
         }
+      });
+      // show empty placeholder if none visible
+      const emptyEl = cont.querySelector('.ad-empty');
+      if (emptyEl) emptyEl.style.display = visibleCount ? 'none' : '';
+    });
+  }
+
+  async loadLine(lineId){
+    // hide station detail
+    this.hideStations();
+    try{
+      const res = await fetch(`/catalog/api/line/${lineId}`, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw new Error('Линия не найдена');
+      const data = await res.json();
+      this.showStations(data);
+    }catch(err){
+      console.error(err);
+      this.showError(err.message || 'Ошибка при загрузке линии');
     }
+  }
 
-    showAdsPanel() {
-        const { advertisingButtons, adsPanel, adsWrapper, backButton } = this.elements;
-        
-        advertisingButtons.classList.add('compact');
-        adsPanel.classList.add('show');
-        adsWrapper.classList.add('shift-left');
-        backButton.classList.add('show');
-        adsPanel.style.display = 'block';
+  showStations(data){
+    if(!data || !data.line) return;
+    this.el.stationsSection.style.display = 'block';
+    this.el.selectedLineName.textContent = `Станции линии: ${data.line.name}`;
+    
+    // Сохраняем цвет линии для использования в стилях
+    const lineColor = data.line.color_code || '#c62828';
+    document.documentElement.style.setProperty('--station-color', lineColor);
+    
+    if(this.el.stationCarousel){
+      this.el.stationCarousel.innerHTML = (data.stations || []).map(s => {
+        return `<button class="carousel-item" data-station-id="${s.id}">${this.escape(s.name)}</button>`;
+      }).join('');
+      this.el.stationCarousel.scrollLeft = 0;
     }
+  }
 
-    resetAdsView() {
-        if (this.activeAdButton) {
-            this.activeAdButton.classList.remove('active');
-            this.activeAdButton = null;
-        }
-
-        const { advertisingButtons, adsPanel, adsWrapper, backButton } = this.elements;
-        
-        advertisingButtons.classList.remove('compact');
-        adsPanel.classList.remove('show');
-        adsWrapper.classList.remove('shift-left');
-        backButton.classList.remove('show');
-        
-        setTimeout(() => {
-            adsPanel.style.display = 'none';
-        }, 300);
+  async loadStation(stationId){
+    this.hideStations();
+    try{
+      const res = await fetch(`/catalog/api/station/${stationId}`, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw new Error('Станция не найдена');
+      const data = await res.json();
+      this.showStationDetail(data.station);
+    }catch(err){
+      console.error(err);
+      this.showError(err.message || 'Ошибка при загрузке станции');
     }
+  }
 
-    async handleLineButtonClick(button) {
-        const line_id = button.getAttribute('data-line-id');
-        this.resetAdsView();
-        this.hideSections(['stationSection']);
+  showStationDetail(station){
+    if(!station) return;
+    this.el.stationSection.style.display = 'block';
+    this.el.stationName.textContent = station.name || '';
+    
+    // Устанавливаем цвет линии для деталей станции
+    const lineColor = (station.Line && station.Line.color_code) ? station.Line.color_code : '#c62828';
+    document.documentElement.style.setProperty('--station-line-color', lineColor);
+    this.el.stationName.style.color = lineColor;
+    
+    this.el.stationId.textContent = station.id || '';
+    this.el.stationYear.textContent = station.opening_year || '';
+    this.el.stationFlow.textContent = station.passenger_flow || '';
+    this.el.stationDesc.textContent = station.description || '';
+    this.el.stationLocation.textContent = station.location || '';
+    this.el.stationLine.textContent = station.Line ? station.Line.name : '';
+    this.el.stationSection.scrollIntoView({behavior:'smooth', block:'start'});
+  }
 
-        try {
-            const response = await fetch(`/catalog/api/line/${line_id}`);
-            if (!response.ok) throw new Error('Линия не найдена');
-            
-            const data = await response.json();
-            this.renderLineStations(data);
-        } catch (error) {
-            this.showError(error.message);
-        }
-    }
+  hideStations(){
+    if(this.el.stationsSection) this.el.stationsSection.style.display = 'none';
+    if(this.el.stationSection) this.el.stationSection.style.display = 'none';
+    this.clearError();
+  }
 
-    renderLineStations(data) {
-        this.elements.stationsSection.style.display = 'block';
-        
-        document.getElementById('selected-line-name').textContent = data.line.name;
-        
-        const carousel = document.getElementById('station-carousel');
-        carousel.style.backgroundColor = data.line.color_code;
-        carousel.innerHTML = data.stations.map(station => 
-            `<button class="carousel-item" data-station-id="${station.id}">
-                ${station.name}
-            </button>`
-        ).join('');
-    }
+  showError(msg){
+    if(!this.el.error) return;
+    this.el.error.textContent = msg;
+    this.el.error.style.display = 'block';
+    setTimeout(()=>{ this.clearError(); }, 6000);
+  }
 
-    async handleStationButtonClick(button) {
-        const stationId = button.getAttribute('data-station-id');
-        this.resetAdsView();
-        this.hideSections(['stationsSection']);
+  clearError(){
+    if(!this.el.error) return;
+    this.el.error.textContent = '';
+    this.el.error.style.display = 'none';
+  }
 
-        try {
-            const response = await fetch(`/catalog/api/station/${stationId}`);
-            if (!response.ok) throw new Error('Станция не найдена');
-            
-            const data = await response.json();
-            this.renderStationDetails(data.station);
-        } catch (error) {
-            this.showError(error.message);
-        }
-    }
-
-    renderStationDetails(station) {
-        this.elements.stationSection.style.display = 'block';
-        
-        document.getElementById('station-name').textContent = station.name;
-        document.getElementById('station-name').style.color = station.Line?.color_code || '#000';
-        document.getElementById('station-id').textContent = station.id;
-        document.getElementById('station-opening-year').textContent = station.opening_year;
-        document.getElementById('station-passenger-flow').textContent = station.passenger_flow;
-        document.getElementById('station-description').textContent = station.description;
-        document.getElementById('station-location').textContent = station.location;
-        document.getElementById('station-line').textContent = station.Line?.name || '';
-    }
-
-    hideSections(exclude = []) {
-        const sections = {
-            stationsSection: this.elements.stationsSection,
-            stationSection: this.elements.stationSection,
-            errorDiv: this.elements.errorDiv
-        };
-
-        Object.entries(sections).forEach(([key, element]) => {
-            if (!exclude.includes(key)) {
-                element.style.display = 'none';
-            }
-        });
-    }
-
-    showError(message) {
-        this.elements.errorDiv.textContent = message;
-        this.elements.errorDiv.style.display = 'block';
-    }
+  escape(v){
+    if(v == null) return '';
+    return String(v)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
 }
 
-// Инициализация при загрузке DOM
-document.addEventListener('DOMContentLoaded', () => {
-    new CatalogManager();
+document.addEventListener('DOMContentLoaded', ()=> {
+  window.catalogManager = new CatalogManager();
 });
