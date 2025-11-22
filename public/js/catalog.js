@@ -78,7 +78,7 @@ class CatalogManager {
       return;
     }
     container.innerHTML = ads.map((a, idx) => {
-      const price = a.base_price != null ? `${this.escape(a.base_price)} ₽` : 'Свяжитесь';
+      const price = a.base_price != null ? `${this.escape(a.base_price)} Br` : 'Свяжитесь';
       // --- Новый блок для placeholder ---
       let imgBlock;
       if (a.image_url) {

@@ -295,6 +295,61 @@ body{
     font-size: 1.2rem;
 }
 
+.ad-types-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ad-type-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.ad-type-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ad-type-info h4 {
+    margin: 0 0 10px 0;
+    color: #c62828;
+    font-size: 1.1rem;
+}
+
+.ad-type-info p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.ad-type-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.ad-type-actions button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.sort-wrapper {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sort-wrapper .form-label {
+    margin-bottom: 0;
+}
+
 /* ================================
    Анимации
 ================================ */

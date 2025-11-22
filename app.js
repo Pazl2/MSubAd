@@ -50,30 +50,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// // Детальная диагностика всех роутеров
-// console.log('=== ДЕТАЛЬНАЯ ДИАГНОСТИКА РОУТЕРОВ ===');
-
-// const routers = [
-//   { name: 'mainRouter', value: mainRouter, file: './routes/main' },
-//   { name: 'authRouter', value: authRouter, file: './routes/auth' },
-//   { name: 'registerRouter', value: registerRouter, file: './routes/register' },
-//   { name: 'cabinetRouter', value: cabinetRouter, file: './routes/cabinet' },
-//   { name: 'catalogRouter', value: catalogRouter, file: './routes/catalog' }
-// ];
-
-// routers.forEach(({ name, value, file }) => {
-//   console.log(`--- ${name} (${file}) ---`);
-//   console.log('Тип:', typeof value);
-//   console.log('Является функцией:', typeof value === 'function');
-//   console.log('Свойства:', Object.keys(value || {}));
-//   console.log('');
-// });
-
-// // Также проверьте сами импорты
-// console.log('=== ПРОВЕРКА ИМПОРТОВ ===');
-// console.log('mainRouter:', mainRouter);
-// console.log('');
-
 // routers
 app.use('/', mainRouter);
 app.use('/', authRouter);
@@ -85,7 +61,7 @@ app.use('/catalog', catalogRouter);
 (async () => {
   try {
     await sequelize.authenticate();
-    // sync models (use { force: true } only for dev)
+    // sync models (use { force: true } only for dev to recreate tables)
     await sequelize.sync(); 
     console.log('DB connected and synced.');
     app.listen(PORT, () => console.log(`Server started at http://localhost:${PORT}`));

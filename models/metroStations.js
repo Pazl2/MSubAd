@@ -10,7 +10,7 @@ module.exports = (sequelize) => {
     location: { type: DataTypes.STRING, allowNull: false },
     line_id: { type: DataTypes.BIGINT, allowNull: true }
   }, {
-    tableName: 'metro_stations',
+    tableName: 'metrostations',
     timestamps: false
   });
 };

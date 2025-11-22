@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticated } = require('../middlewares/auth');
-const { User } = require('../models');
+const { User, AdType, AdSpace } = require('../models');
 const ExcelJS = require('exceljs');
 const router = express.Router();
 
@@ -190,6 +190,301 @@ router.get('/cabinet/download-users', ensureAuthenticated, async (req, res) => {
     // Устанавливаем заголовки ответа
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="users_database.xlsx"');
+
+    // Отправляем файл
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.get('/cabinet/download-ad-types', ensureAuthenticated, async (req, res) => {
+  try {
+    const moderatorUsername = req.session.user.username;
+
+    // Проверяем, является ли текущий пользователь модератором
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.status(403).json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    // Получаем все типы рекламы
+    const adTypes = await AdType.findAll({ raw: true });
+
+    // Создаем новую книгу Excel
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Типы рекламы');
+
+    // Добавляем заголовки
+    worksheet.columns = [
+      { header: 'ID', key: 'id', width: 10 },
+      { header: 'Название', key: 'name', width: 20 },
+      { header: 'Описание', key: 'description', width: 30 },
+      { header: 'Ширина (px)', key: 'width', width: 15 },
+      { header: 'Высота (px)', key: 'height', width: 15 },
+      { header: 'Локация', key: 'location', width: 15 },
+      { header: 'Базовая цена', key: 'base_price', width: 15 }
+    ];
+
+    // Добавляем стиль для заголовков
+    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC62828' } };
+
+    // Добавляем данные типов рекламы
+    adTypes.forEach(adType => {
+      worksheet.addRow({
+        id: adType.id,
+        name: adType.name,
+        description: adType.description,
+        width: adType.width,
+        height: adType.height,
+        location: adType.location ? 'Поезд' : 'Станция',
+        base_price: adType.base_price
+      });
+    });
+
+    // Устанавливаем заголовки ответа
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="ad_types_database.xlsx"');
+
+    // Отправляем файл
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.get('/cabinet/get-ad-types', ensureAuthenticated, async (req, res) => {
+  try {
+    const moderatorUsername = req.session.user.username;
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const adTypes = await AdType.findAll({ raw: true });
+    res.json({ success: true, adTypes });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/add-ad-type', ensureAuthenticated, async (req, res) => {
+  try {
+    const { name, description, width, height, location, basePrice } = req.body;
+    const moderatorUsername = req.session.user.username;
+
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    // Проверяем, не существует ли уже такой тип рекламы
+    const existingAdType = await AdType.findOne({ where: { name } });
+    if (existingAdType) {
+      return res.json({ success: false, message: 'Тип рекламы с таким именем уже существует' });
+    }
+
+    await AdType.create({
+      name,
+      description,
+      width,
+      height,
+      location: location === 1,
+      base_price: basePrice
+    });
+
+    res.json({ success: true, message: 'Тип рекламы успешно добавлен' });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/update-ad-type', ensureAuthenticated, async (req, res) => {
+  try {
+    const { id, name, description, width, height, location, basePrice } = req.body;
+    const moderatorUsername = req.session.user.username;
+
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const adType = await AdType.findByPk(id);
+    if (!adType) {
+      return res.json({ success: false, message: 'Тип рекламы не найден' });
+    }
+
+    // Проверяем, не существует ли уже другой тип рекламы с таким именем
+    if (name !== adType.name) {
+      const existingAdType = await AdType.findOne({ where: { name } });
+      if (existingAdType) {
+        return res.json({ success: false, message: 'Тип рекламы с таким именем уже существует' });
+      }
+    }
+
+    await adType.update({
+      name,
+      description,
+      width,
+      height,
+      location: location === 1,
+      base_price: basePrice
+    });
+
+    res.json({ success: true, message: 'Тип рекламы успешно изменен' });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/delete-ad-type', ensureAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.body;
+    const moderatorUsername = req.session.user.username;
+
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const adType = await AdType.findByPk(id);
+    if (!adType) {
+      return res.json({ success: false, message: 'Тип рекламы не найден' });
+    }
+
+    await adType.destroy();
+    res.json({ success: true, message: 'Тип рекламы успешно удален' });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/add-ad-spaces', ensureAuthenticated, async (req, res) => {
+  try {
+    const { typeId, quantity, stationId, trainId } = req.body;
+    const moderatorUsername = req.session.user.username;
+
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    if (!typeId || !quantity || quantity < 1) {
+      return res.json({ success: false, message: 'Некорректные данные' });
+    }
+
+    for (let i = 0; i < quantity; i++) {
+      await AdSpace.create({
+        station_id: stationId || null,
+        train_id: trainId || null,
+        type_id: typeId,
+        availability: true
+      });
+    }
+
+    res.json({ success: true, message: `Успешно добавлено ${quantity} рекламных мест` });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/delete-ad-spaces', ensureAuthenticated, async (req, res) => {
+  try {
+    const { typeId, quantity, stationId, trainId } = req.body;
+    const moderatorUsername = req.session.user.username;
+
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    if (!typeId || !quantity || quantity < 1) {
+      return res.json({ success: false, message: 'Некорректные данные' });
+    }
+
+    const where = {
+      type_id: typeId,
+      station_id: stationId || null,
+      train_id: trainId || null
+    };
+
+    const deleted = await AdSpace.destroy({
+      where: where,
+      limit: quantity
+    });
+
+    if (deleted === 0) {
+      return res.json({ success: false, message: 'Рекламные места не найдены' });
+    }
+
+    res.json({ success: true, message: `Успешно удалено ${deleted} рекламных мест` });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.get('/cabinet/download-ad-spaces', ensureAuthenticated, async (req, res) => {
+  try {
+    const moderatorUsername = req.session.user.username;
+
+    // Проверяем, является ли текущий пользователь модератором
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.status(403).json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    // Получаем все рекламные места с информацией о типе, станции и поезде
+    const adSpaces = await AdSpace.findAll({ 
+      include: [
+        { association: 'AdType', attributes: ['id', 'name'] },
+        { association: 'MetroStation', attributes: ['id', 'name'] },
+        { association: 'Train', attributes: ['id', 'number'] }
+      ],
+      raw: true
+    });
+
+    // Создаем новую книгу Excel
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Рекламные места');
+
+    // Добавляем заголовки
+    worksheet.columns = [
+      { header: 'ID', key: 'id', width: 10 },
+      { header: 'Тип рекламы', key: 'type_name', width: 20 },
+      { header: 'Станция', key: 'station_name', width: 25 },
+      { header: 'Поезд', key: 'train_number', width: 15 },
+      { header: 'Доступно', key: 'availability', width: 12 }
+    ];
+
+    // Добавляем стиль для заголовков
+    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC62828' } };
+
+    // Добавляем данные рекламных мест
+    adSpaces.forEach(adSpace => {
+      worksheet.addRow({
+        id: adSpace.id,
+        type_name: adSpace['AdType.name'] || '-',
+        station_name: adSpace['MetroStation.name'] || '-',
+        train_number: adSpace['Train.number'] || '-',
+        availability: adSpace.availability ? 'Да' : 'Нет'
+      });
+    });
+
+    // Устанавливаем заголовки ответа
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="ad_spaces_database.xlsx"');
 
     // Отправляем файл
     await workbook.xlsx.write(res);

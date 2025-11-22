@@ -1,6 +1,6 @@
 // routes/catalog.js
 const express = require('express');
-const { Line, MetroStation, AdType } = require('../models');
+const { Line, MetroStation, AdType, MetroStations, Train } = require('../models');
 const router = express.Router();
 
 const defaultRenderParams = {
@@ -67,6 +67,81 @@ router.get('/api/ads', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Ошибка при получении рекламы' });
+  }
+});
+
+// New routes for getting lines, stations, and trains
+router.get('/get-lines', async (req, res) => {
+  try {
+    const { Line } = require('../models');
+    const lines = await Line.findAll({ 
+      raw: true,
+      order: [['id', 'ASC']]
+    });
+    
+    console.log('Found lines count:', lines.length);
+    console.log('Lines data:', JSON.stringify(lines, null, 2));
+    
+    res.json({ success: true, lines: lines || [] });
+  } catch (err) {
+    console.error('Error getting lines:', err);
+    res.json({ success: false, message: 'Ошибка сервера: ' + err.message, lines: [] });
+  }
+});
+
+router.get('/get-stations', async (req, res) => {
+  try {
+    const { MetroStation } = require('../models');
+    const lineId = req.query.line_id;
+    
+    console.log('Getting stations for line_id:', lineId);
+    
+    if (!lineId) {
+      console.log('No line_id provided');
+      return res.json({ success: false, message: 'Line ID не указан', stations: [] });
+    }
+    
+    const stations = await MetroStation.findAll({ 
+      where: { line_id: lineId },
+      raw: true,
+      order: [['id', 'ASC']]
+    });
+    
+    console.log('Found stations count:', stations.length);
+    console.log('Stations data:', JSON.stringify(stations, null, 2));
+    
+    res.json({ success: true, stations: stations || [] });
+  } catch (err) {
+    console.error('Error getting stations:', err);
+    res.json({ success: false, message: 'Ошибка сервера: ' + err.message, stations: [] });
+  }
+});
+
+router.get('/get-trains', async (req, res) => {
+  try {
+    const { Train } = require('../models');
+    const lineId = req.query.line_id;
+    
+    console.log('Getting trains for line_id:', lineId);
+    
+    if (!lineId) {
+      console.log('No line_id provided');
+      return res.json({ success: false, message: 'Line ID не указан', trains: [] });
+    }
+    
+    const trains = await Train.findAll({ 
+      where: { line_id: lineId },
+      raw: true,
+      order: [['id', 'ASC']]
+    });
+    
+    console.log('Found trains count:', trains.length);
+    console.log('Trains data:', JSON.stringify(trains, null, 2));
+    
+    res.json({ success: true, trains: trains || [] });
+  } catch (err) {
+    console.error('Error getting trains:', err);
+    res.json({ success: false, message: 'Ошибка сервера: ' + err.message, trains: [] });
   }
 });
 
