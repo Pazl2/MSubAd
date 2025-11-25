@@ -248,6 +248,78 @@
             </div>
           </div>
         </div>
+
+        <!-- Template Management -->
+        <div id="manageTemplatesMode" style="display: none;">
+          <div class="cabinet-info-large">
+            <div class="tabs-wrapper">
+              <div class="tabs-header">
+                <button class="tab-button active" onclick="switchTemplateTab('create')">Создать</button>
+                <button class="tab-button" onclick="switchTemplateTab('pending')">Ожидающие проверки</button>
+                <button class="tab-button" onclick="switchTemplateTab('approved')">Одобренные</button>
+                <button class="tab-button" onclick="switchTemplateTab('rejected')">Заблокированные</button>
+              </div>
+
+              <!-- Create Tab -->
+              <div id="template-create-tab" class="tab-content active">
+                <div class="info-section">
+                  <h3>Создание нового шаблона</h3>
+                  <div class="form-group">
+                    <label class="form-label">Название шаблона:</label>
+                    <input type="text" id="templateName" class="form-input" placeholder="Введите название шаблона" onchange="updateTemplateFormState()">
+
+                    <label class="form-label">Локация:</label>
+                    <select id="templateLocation" class="form-select" onchange="updateTemplateLocationAndTypes()" disabled>
+                      <option value="">Выберите локацию</option>
+                      <option value="0">Станция</option>
+                      <option value="1">Поезд</option>
+                    </select>
+
+                    <label class="form-label">Тип рекламы:</label>
+                    <select id="templateAdType" class="form-select" onchange="updateTemplatePreview()" disabled>
+                      <option value="">Выберите тип рекламы</option>
+                    </select>
+
+                    <label class="form-label">Ссылка на картинку:</label>
+                    <input type="url" id="templateImageUrl" class="form-input" placeholder="Введите URL картинки" onchange="updateTemplatePreview()" disabled>
+
+                    <label class="form-label">Предпросмотр:</label>
+                    <div id="templatePreview" class="template-preview">
+                      <div class="template-placeholder">Здесь будет предпросмотр вашей рекламы</div>
+                    </div>
+
+                    <button type="button" class="confirm-button" onclick="createTemplate()">Создать шаблон</button>
+                    <span class="error-message" id="templateError"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pending Tab -->
+              <div id="template-pending-tab" class="tab-content">
+                <div class="info-section">
+                  <h3>Ожидающие проверки</h3>
+                  <div id="templatePendingList" class="templates-list"></div>
+                </div>
+              </div>
+
+              <!-- Approved Tab -->
+              <div id="template-approved-tab" class="tab-content">
+                <div class="info-section">
+                  <h3>Одобренные</h3>
+                  <div id="templateApprovedList" class="templates-list"></div>
+                </div>
+              </div>
+
+              <!-- Rejected Tab -->
+              <div id="template-rejected-tab" class="tab-content">
+                <div class="info-section">
+                  <h3>Заблокированные</h3>
+                  <div id="templateRejectedList" class="templates-list"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -319,6 +391,7 @@
       document.getElementById('manageUsersMode').style.display = 'block';
       document.getElementById('manageAdTypesMode').style.display = 'none';
       document.getElementById('manageAdSpacesMode').style.display = 'none';
+      document.getElementById('manageTemplatesMode').style.display = 'none';
       document.getElementById('pageTitle').textContent = 'Управление пользователями';
       updateNavLink('manage-users');
       clearAdTypeForm();
@@ -330,6 +403,7 @@
       document.getElementById('manageUsersMode').style.display = 'none';
       document.getElementById('manageAdTypesMode').style.display = 'none';
       document.getElementById('manageAdSpacesMode').style.display = 'none';
+      document.getElementById('manageTemplatesMode').style.display = 'none';
       document.getElementById('pageTitle').textContent = 'Личный кабинет';
       updateNavLink('account');
     }
@@ -340,6 +414,7 @@
       document.getElementById('manageUsersMode').style.display = 'none';
       document.getElementById('manageAdTypesMode').style.display = 'block';
       document.getElementById('manageAdSpacesMode').style.display = 'none';
+      document.getElementById('manageTemplatesMode').style.display = 'none';
       document.getElementById('pageTitle').textContent = 'Управление типами рекламы';
       updateNavLink('manage-ad-types');
       loadAdTypes();
@@ -351,9 +426,408 @@
       document.getElementById('manageUsersMode').style.display = 'none';
       document.getElementById('manageAdTypesMode').style.display = 'none';
       document.getElementById('manageAdSpacesMode').style.display = 'block';
+      document.getElementById('manageTemplatesMode').style.display = 'none';
       document.getElementById('pageTitle').textContent = 'Управление рекламными местами';
       updateNavLink('manage-ad-spaces');
       loadAdSpacesOptions();
+    }
+
+    function showCreateTemplate() {
+      document.getElementById('viewMode').style.display = 'none';
+      document.getElementById('editMode').style.display = 'none';
+      document.getElementById('manageUsersMode').style.display = 'none';
+      document.getElementById('manageAdTypesMode').style.display = 'none';
+      document.getElementById('manageAdSpacesMode').style.display = 'none';
+      document.getElementById('manageTemplatesMode').style.display = 'block';
+      document.getElementById('pageTitle').textContent = 'Создать шаблон';
+      updateNavLink('create-template');
+      loadTemplateAdTypes();
+      loadTemplates();
+    }
+
+    function switchTemplateTab(tabName) {
+      // Скрываем все табы
+      document.getElementById('template-create-tab').classList.remove('active');
+      document.getElementById('template-pending-tab').classList.remove('active');
+      document.getElementById('template-approved-tab').classList.remove('active');
+      document.getElementById('template-rejected-tab').classList.remove('active');
+
+      // Убираем активный класс со всех кнопок
+      const buttons = document.querySelectorAll('.tab-button');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      // Показываем нужный таб и делаем кнопку активной
+      if (tabName === 'create') {
+        document.getElementById('template-create-tab').classList.add('active');
+        buttons[0].classList.add('active');
+      } else if (tabName === 'pending') {
+        document.getElementById('template-pending-tab').classList.add('active');
+        buttons[1].classList.add('active');
+        loadTemplatesByStatus('pending');
+      } else if (tabName === 'approved') {
+        document.getElementById('template-approved-tab').classList.add('active');
+        buttons[2].classList.add('active');
+        loadTemplatesByStatus('approved');
+      } else if (tabName === 'rejected') {
+        document.getElementById('template-rejected-tab').classList.add('active');
+        buttons[3].classList.add('active');
+        loadTemplatesByStatus('rejected');
+      }
+    }
+
+    function loadTemplateAdTypes() {
+      fetch('/cabinet/get-all-ad-types')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            window.allAdTypes = data.adTypes;
+            updateTemplateLocationAndTypes();
+          }
+        })
+        .catch(err => console.error('Error loading ad types:', err));
+    }
+
+    function updateTemplateFormState() {
+      const nameInput = document.getElementById('templateName');
+      const locationSelect = document.getElementById('templateLocation');
+
+      if (nameInput.value.trim()) {
+        locationSelect.disabled = false;
+      } else {
+        locationSelect.disabled = true;
+        locationSelect.value = '';
+        updateTemplateLocationAndTypes();
+      }
+    }
+
+    function updateTemplateLocationAndTypes() {
+      const location = document.getElementById('templateLocation').value;
+      const typeSelect = document.getElementById('templateAdType');
+      const imageInput = document.getElementById('templateImageUrl');
+
+      typeSelect.innerHTML = '<option value="">Выберите тип рекламы</option>';
+      imageInput.value = '';
+      updateTemplatePreview();
+
+      if (!location) {
+        typeSelect.disabled = true;
+        imageInput.disabled = true;
+        return;
+      }
+
+      typeSelect.disabled = false;
+      const locationValue = parseInt(location);
+
+      if (window.allAdTypes) {
+        window.allAdTypes.forEach(type => {
+          if ((type.location ? 1 : 0) === locationValue) {
+            typeSelect.innerHTML += `<option value="${type.id}" data-width="${type.width}" data-height="${type.height}">${type.name}</option>`;
+          }
+        });
+      }
+    }
+
+    function updateTemplatePreview() {
+      const typeId = document.getElementById('templateAdType').value;
+      const imageUrl = document.getElementById('templateImageUrl').value;
+      const imageInput = document.getElementById('templateImageUrl');
+      const typeSelect = document.getElementById('templateAdType');
+
+      // Включаем поле с URL если выбран тип
+      if (typeId) {
+        imageInput.disabled = false;
+      } else {
+        imageInput.disabled = true;
+        imageInput.value = '';
+      }
+
+      const previewDiv = document.getElementById('templatePreview');
+
+      if (!typeId) {
+        previewDiv.innerHTML = '<div class="template-placeholder">Здесь будет предпросмотр вашей рекламы</div>';
+        return;
+      }
+
+      const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+      const width = parseInt(selectedOption.dataset.width) || 100;
+      const height = parseInt(selectedOption.dataset.height) || 50;
+      const aspectRatio = width / height;
+
+      // Размеры контейнера предпросмотра - УВЕЛИЧЕНЫ
+      const containerSize = 700; // 700x700 квадратное окно (было 300)
+      const maxSize = containerSize * (2/3); // 2/3 от размера окна
+
+      let displayWidth, displayHeight;
+
+      if (width > height) {
+        // Ширина больше высоты
+        displayWidth = maxSize;
+        displayHeight = maxSize / aspectRatio;
+      } else {
+        // Высота больше ширины (или равны)
+        displayHeight = maxSize;
+        displayWidth = maxSize * aspectRatio;
+      }
+
+      if (!imageUrl) {
+        // Плейсхолдер с правильными размерами
+        const sizeText = width + '×' + height;
+
+        previewDiv.innerHTML = `
+          <svg width="${displayWidth}" height="${displayHeight}" viewBox="0 0 ${width} ${height}" style="background:#f5f5f5;border-radius:6px;">
+            <rect x="0" y="0" width="${width}" height="${height}" rx="8" fill="#fdecea" stroke="#c62828" stroke-width="2"/>
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="#c62828" font-family="Segoe UI, Arial" font-weight="bold">${sizeText}</text>
+          </svg>
+        `;
+      } else {
+        // Изображение с правильными размерами
+        previewDiv.innerHTML = `
+          <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px;">
+            <img src="${imageUrl}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+        `;
+      }
+    }
+
+    function createTemplate() {
+      const name = document.getElementById('templateName').value.trim();
+      const location = document.getElementById('templateLocation').value;
+      const typeId = parseInt(document.getElementById('templateAdType').value);
+      const imageUrl = document.getElementById('templateImageUrl').value.trim();
+      const errorEl = document.getElementById('templateError');
+      errorEl.textContent = '';
+
+      if (!name) {
+        errorEl.textContent = 'Введите название шаблона';
+        return;
+      }
+
+      if (!location) {
+        errorEl.textContent = 'Выберите локацию';
+        return;
+      }
+
+      if (!typeId) {
+        errorEl.textContent = 'Выберите тип рекламы';
+        return;
+      }
+
+      fetch('/cabinet/create-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ad_title: name, 
+          type_id: typeId, 
+          content_url: imageUrl || '' 
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('Шаблон успешно создан');
+          document.getElementById('templateName').value = '';
+          document.getElementById('templateLocation').value = '';
+          document.getElementById('templateAdType').value = '';
+          document.getElementById('templateImageUrl').value = '';
+          document.getElementById('templatePreview').innerHTML = '<div class="template-placeholder">Здесь будет предпросмотр вашей рекламы</div>';
+          updateTemplateFormState();
+          loadTemplates();
+        } else {
+          errorEl.textContent = data.message;
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        errorEl.textContent = 'Ошибка сервера';
+      });
+    }
+
+    function loadTemplates() {
+      loadTemplatesByStatus('pending');
+      loadTemplatesByStatus('approved');
+      loadTemplatesByStatus('rejected');
+    }
+
+    function loadTemplatesByStatus(status) {
+      fetch(`/cabinet/get-templates?status=${status}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            const containerId = `template${status.charAt(0).toUpperCase() + status.slice(1)}List`;
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (data.templates.length === 0) {
+              container.innerHTML = `<p style="color: #999;">Шаблонов со статусом "${getStatusText(status)}" не найдено</p>`;
+              return;
+            }
+
+            data.templates.forEach(template => {
+              const item = document.createElement('div');
+              item.className = 'template-item';
+              
+              // Получаем информацию о типе рекламы для правильного масштабирования
+              let displayWidth = 350;
+              let displayHeight = 350;
+              let aspectRatio = 1;
+              
+              if (window.allAdTypes) {
+                const adType = window.allAdTypes.find(t => t.id === template.type_id);
+                if (adType) {
+                  const width = parseInt(adType.width) || 100;
+                  const height = parseInt(adType.height) || 50;
+                  aspectRatio = width / height;
+                  
+                  const maxSize = 350;
+                  if (width > height) {
+                    displayWidth = maxSize;
+                    displayHeight = maxSize / aspectRatio;
+                  } else {
+                    displayHeight = maxSize;
+                    displayWidth = maxSize * aspectRatio;
+                  }
+                }
+              }
+              
+              let imageHtml = '';
+              if (template.content_url) {
+                imageHtml = `
+                  <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px; margin: 0 auto;">
+                    <img src="${template.content_url}" alt="Template" style="width: 100%; height: 100%; object-fit: cover;">
+                  </div>
+                `;
+              } else {
+                imageHtml = '<p style="color: #999;">Изображение не загружено</p>';
+              }
+              
+              item.innerHTML = `
+                <div class="template-item-header">
+                  <h4>${template.ad_title}</h4>
+                  <span class="template-status ${status}">${getStatusText(status)}</span>
+                </div>
+                <div class="template-item-content">
+                  ${imageHtml}
+                </div>
+                <div class="template-item-info">
+                  <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
+                  ${template.approval_date ? `<p><strong>Дата проверки:</strong> ${new Date(template.approval_date).toLocaleString('ru-RU')}</p>` : ''}
+                  ${template.rejection_reason ? `<p><strong>Причина отклонения:</strong> ${template.rejection_reason}</p>` : ''}
+                </div>
+                <div class="template-item-actions">
+                  <button class="delete-button" onclick="deleteTemplate(${template.id})">Удалить</button>
+                </div>
+              `;
+              container.appendChild(item);
+            });
+          }
+        })
+        .catch(err => console.error('Error loading templates:', err));
+    }
+
+    function deleteTemplate(templateId) {
+      if (!confirm('Вы уверены, что хотите удалить этот шаблон?')) {
+        return;
+      }
+
+      fetch('/cabinet/delete-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ template_id: templateId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('Шаблон успешно удален');
+          loadTemplates();
+        } else {
+          alert('Ошибка: ' + data.message);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Ошибка при удалении шаблона');
+      });
+    }
+
+    function getStatusText(status) {
+      const statuses = {
+        'pending': 'Ожидает проверки',
+        'approved': 'Одобрено',
+        'rejected': 'Отклонено'
+      };
+      return statuses[status] || status;
+    }
+
+    function downloadUsersDatabase() {
+      fetch('/cabinet/download-users')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Ошибка при скачивании');
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'users_database.xlsx';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Ошибка при скачивании базы данных пользователей');
+        });
+    }
+
+    function downloadAdTypesDatabase() {
+      fetch('/cabinet/download-ad-types')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Ошибка при скачивании');
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'ad_types_database.xlsx';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Ошибка при скачивании базы данных');
+        });
+    }
+
+    function downloadAdSpacesDatabase() {
+      fetch('/cabinet/download-ad-spaces')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Ошибка при скачивании');
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'ad_spaces_database.xlsx';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Ошибка при скачивании базы данных рекламных мест');
+        });
     }
 
     function loadAdTypes() {
@@ -530,78 +1004,6 @@
         console.error(err);
         alert('Ошибка сервера');
       });
-    }
-
-    function downloadUsersDatabase() {
-      fetch('/cabinet/download-users')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Ошибка при скачивании');
-          }
-          return response.blob();
-        })
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = 'users_database.xlsx';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Ошибка при скачивании базы данных пользователей');
-        });
-    }
-
-    function downloadAdTypesDatabase() {
-      fetch('/cabinet/download-ad-types')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Ошибка при скачивании');
-          }
-          return response.blob();
-        })
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = 'ad_types_database.xlsx';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Ошибка при скачивании базы данных');
-        });
-    }
-
-    function downloadAdSpacesDatabase() {
-      fetch('/cabinet/download-ad-spaces')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Ошибка при скачивании');
-          }
-          return response.blob();
-        })
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = 'ad_spaces_database.xlsx';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Ошибка при скачивании базы данных рекламных мест');
-        });
     }
 
     function loadAdSpacesOptions() {
@@ -880,6 +1282,11 @@
         const manageAdSpacesLink = Array.from(links).find(link => link.textContent.includes('Управление рекламными местами'));
         if (manageAdSpacesLink) {
           manageAdSpacesLink.classList.add('active');
+        }
+      } else if (page === 'create-template') {
+        const createTemplateLink = Array.from(links).find(link => link.textContent.includes('Создать шаблон'));
+        if (createTemplateLink) {
+          createTemplateLink.classList.add('active');
         }
       }
     }

@@ -8,6 +8,7 @@ const MetroStation = require('./metroStations')(sequelize, DataTypes);
 const AdType = require('./adType')(sequelize, DataTypes);
 const Train = require('./trains')(sequelize, DataTypes);
 const AdSpace = require('./adSpace')(sequelize, DataTypes);
+const Template = require('./template')(sequelize, DataTypes);
 
 // Associations
 Line.hasMany(MetroStation, { foreignKey: 'line_id' });
@@ -33,5 +34,6 @@ module.exports = {
   MetroStation,
   AdType,
   Train,
-  AdSpace
+  AdSpace,
+  Template
 };

@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticated } = require('../middlewares/auth');
-const { User, AdType, AdSpace } = require('../models');
+const { User, AdType, AdSpace, Template } = require('../models');
 const ExcelJS = require('exceljs');
 const router = express.Router();
 
@@ -274,6 +274,16 @@ router.get('/cabinet/get-ad-types', ensureAuthenticated, async (req, res) => {
   }
 });
 
+router.get('/cabinet/get-all-ad-types', ensureAuthenticated, async (req, res) => {
+  try {
+    const adTypes = await AdType.findAll({ raw: true });
+    res.json({ success: true, adTypes });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
 router.post('/cabinet/add-ad-type', ensureAuthenticated, async (req, res) => {
   try {
     const { name, description, width, height, location, basePrice } = req.body;
@@ -492,6 +502,83 @@ router.get('/cabinet/download-ad-spaces', ensureAuthenticated, async (req, res) 
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/create-template', ensureAuthenticated, async (req, res) => {
+  try {
+    const { ad_title, type_id, content_url } = req.body;
+    const userId = req.session.user.id;
+
+    if (!ad_title || !type_id) {
+      return res.json({ success: false, message: 'Заполните обязательные поля' });
+    }
+
+    await Template.create({
+      user_id: userId,
+      type_id: type_id,
+      ad_title: ad_title,
+      content_url: content_url || '',
+      upload_date: new Date(),
+      approval_status: 'pending',
+      moder_id: null,
+      approval_date: null,
+      rejection_reason: null
+    });
+
+    res.json({ success: true, message: 'Шаблон успешно создан' });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.get('/cabinet/get-templates', ensureAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const status = req.query.status || 'pending';
+
+    const templates = await Template.findAll({
+      where: {
+        user_id: userId,
+        approval_status: status
+      },
+      raw: true,
+      order: [['upload_date', 'DESC']]
+    });
+
+    res.json({ success: true, templates });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/delete-template', ensureAuthenticated, async (req, res) => {
+  try {
+    const { template_id } = req.body;
+    const userId = req.session.user.id;
+
+    if (!template_id) {
+      return res.json({ success: false, message: 'ID шаблона не указан' });
+    }
+
+    const template = await Template.findOne({
+      where: {
+        id: template_id,
+        user_id: userId
+      }
+    });
+
+    if (!template) {
+      return res.json({ success: false, message: 'Шаблон не найден или у вас нет прав на его удаление' });
+    }
+
+    await template.destroy();
+    res.json({ success: true, message: 'Шаблон успешно удален' });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
   }
 });
 
