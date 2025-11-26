@@ -1,0 +1,135 @@
+<!-- User Management -->
+<div id="manageUsersMode" style="display: none;">
+  <div class="cabinet-info-large">
+    <div class="button-download-wrapper">
+      <button type="button" class="download-button" onclick="downloadUsersDatabase()">
+        <span class="download-icon">📥</span>Скачать базу данных
+      </button>
+    </div>
+
+    <div class="info-section">
+      <h3>Изменить роль</h3>
+      <div class="form-group">
+        <label class="form-label">Логин пользователя:</label>
+        <input type="text" id="changeRoleUsername" class="form-input" placeholder="Введите логин">
+        <label class="form-label">Новая роль:</label>
+        <select id="roleSelect" class="form-select">
+          <option value="user">Пользователь</option>
+          <option value="moderator">Модератор</option>
+        </select>
+        <button type="button" class="confirm-button" onclick="changeUserRole()">Изменить</button>
+        <span class="error-message" id="changeRoleError"></span>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>Удалить пользователя</h3>
+      <div class="form-group">
+        <label class="form-label">Логин пользователя:</label>
+        <input type="text" id="deleteUsername" class="form-input" placeholder="Введите логин">
+        <button type="button" class="confirm-button delete-button" onclick="deleteUser()">Удалить</button>
+        <span class="error-message" id="deleteUserError"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ad Types Management -->
+<div id="manageAdTypesMode" style="display: none;">
+  <div class="cabinet-info-large">
+    <div class="info-section">
+      <h3>Управление типами рекламы</h3>
+      <div class="form-group">
+        <label class="form-label">Имя типа:</label>
+        <input type="text" id="adTypeName" class="form-input" placeholder="Например: Баннер">
+        <label class="form-label">Описание:</label>
+        <textarea id="adTypeDescription" class="form-input" placeholder="Описание типа рекламы" rows="3"></textarea>
+        <label class="form-label">Ширина (px):</label>
+        <input type="number" id="adTypeWidth" class="form-input" placeholder="Введите ширину" min="1">
+        <label class="form-label">Высота (px):</label>
+        <input type="number" id="adTypeHeight" class="form-input" placeholder="Введите высоту" min="1">
+        <label class="form-label">Локация:</label>
+        <select id="adTypeLocation" class="form-select">
+          <option value="0">Станция</option>
+          <option value="1">Поезд</option>
+        </select>
+        <label class="form-label">Базовая цена:</label>
+        <input type="number" id="adTypeBasePrice" class="form-input" placeholder="Введите цену" min="0" step="0.01">
+        <div class="button-group">
+          <button type="button" class="confirm-button" onclick="addAdType()">Добавить</button>
+          <button type="button" class="confirm-button" onclick="updateAdType()">Изменить</button>
+        </div>
+        <span class="error-message" id="adTypeError"></span>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>Существующие типы рекламы</h3>
+      <div class="button-download-wrapper">
+        <button type="button" class="download-button" onclick="downloadAdTypesDatabase()">
+          <span class="download-icon">📥</span>Скачать базу данных
+        </button>
+      </div>
+      <div class="sort-wrapper">
+        <label class="form-label" for="adTypeSort">Сортировка по цене:</label>
+        <select id="adTypeSort" class="form-select" onchange="loadAdTypes()">
+          <option value="none">Без сортировки</option>
+          <option value="asc">По возрастанию</option>
+          <option value="desc">По убыванию</option>
+        </select>
+      </div>
+      <div id="adTypesList" class="ad-types-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Ad Spaces Management -->
+<div id="manageAdSpacesMode" style="display: none;">
+  <div class="cabinet-info-large">
+    <div class="info-section">
+      <h3>Управление рекламными местами</h3>
+      <div class="button-download-wrapper">
+        <button type="button" class="download-button" onclick="downloadAdSpacesDatabase()">
+          <span class="download-icon">📥</span>Скачать базу данных
+        </button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Локация:</label>
+        <select id="spaceLocation" class="form-select" onchange="updateSpaceOptions()">
+          <option value="">Выберите локацию</option>
+          <option value="0">Станция</option>
+          <option value="1">Поезд</option>
+        </select>
+
+        <label class="form-label">Тип рекламы:</label>
+        <select id="spaceAdType" class="form-select" onchange="onSpaceTypeChange()">
+          <option value="">Выберите тип рекламы</option>
+        </select>
+
+        <label class="form-label">Линия метро:</label>
+        <select id="spaceLine" class="form-select" onchange="updateSpaceStationsOrTrains()">
+          <option value="">Выберите линию</option>
+        </select>
+
+        <label class="form-label" id="spaceStationLabel" style="display: none;">Станция:</label>
+        <select id="spaceStation" class="form-select" style="display: none;">
+          <option value="">Выберите станцию</option>
+        </select>
+
+        <label class="form-label" id="spaceTrainLabel" style="display: none;">Поезд:</label>
+        <select id="spaceTrain" class="form-select" style="display: none;">
+          <option value="">Выберите поезд</option>
+        </select>
+
+        <label class="form-label">Количество мест:</label>
+        <input type="number" id="spaceQuantity" class="form-input" placeholder="Введите количество" min="1">
+
+        <div class="button-group">
+          <button type="button" class="confirm-button" onclick="addAdSpaces()">Добавить</button>
+          <button type="button" class="confirm-button delete-button" onclick="deleteAdSpaces()">Удалить</button>
+        </div>
+        <span class="error-message" id="spaceError"></span>
+      </div>
+    </div>
+  </div>
+</div>

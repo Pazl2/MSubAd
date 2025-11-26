@@ -26,6 +26,10 @@ AdSpace.belongsTo(Train, { foreignKey: 'train_id' });
 AdType.hasMany(AdSpace, { foreignKey: 'type_id' });
 AdSpace.belongsTo(AdType, { foreignKey: 'type_id' });
 
+// Template associations
+Template.belongsTo(AdType, { foreignKey: 'type_id', as: 'AdType' });
+AdType.hasMany(Template, { foreignKey: 'type_id' });
+
 module.exports = {
   sequelize,
   Sequelize,

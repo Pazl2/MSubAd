@@ -1,0 +1,85 @@
+<!-- Account View Mode -->
+<div class="cabinet-info-large" id="viewMode">
+  <div class="info-section">
+    <h3>Основная информация</h3>
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">Логин:</span><span class="info-value"><%= user.username %></span></div>
+      <div class="info-item"><span class="info-label">Имя:</span><span class="info-value" id="view-first_name"><%= user.first_name %></span></div>
+      <div class="info-item"><span class="info-label">Фамилия:</span><span class="info-value" id="view-last_name"><%= user.last_name %></span></div>
+      <div class="info-item"><span class="info-label">Отчество:</span><span class="info-value" id="view-father_name"><%= user.father_name %></span></div>
+    </div>
+  </div>
+
+  <div class="info-section">
+    <h3>Контактная информация</h3>
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">Email:</span><span class="info-value" id="view-email"><%= user.email %></span></div>
+      <div class="info-item"><span class="info-label">Телефон:</span><span class="info-value" id="view-phone"><%= user.phone %></span></div>
+    </div>
+  </div>
+
+  <div class="info-section">
+    <h3>Информация об аккаунте</h3>
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">Дата регистрации:</span><span class="info-value"><%= new Date(user.registration_date).toLocaleString('ru-RU') %></span></div>
+      <div class="info-item"><span class="info-label">Статус:</span><span class="info-value"><%= user.is_moder ? 'Модератор' : 'Пользователь' %></span></div>
+    </div>
+  </div>
+
+  <button class="edit-button" onclick="toggleEditMode()">Редактировать</button>
+</div>
+
+<!-- Account Edit Mode -->
+<form id="editMode" style="display: none;" onsubmit="saveChanges(event)">
+  <div class="cabinet-info-large">
+    <div class="info-section">
+      <h3>Основная информация</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Логин:</span>
+          <span class="info-value"><%= user.username %></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Имя:</span>
+          <input type="text" name="first_name" value="<%= user.first_name %>" class="edit-input" required>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Фамилия:</span>
+          <input type="text" name="last_name" value="<%= user.last_name %>" class="edit-input" required>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Отчество:</span>
+          <input type="text" name="father_name" value="<%= user.father_name %>" class="edit-input" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>Контактная информация</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Email:</span>
+          <input type="email" name="email" value="<%= user.email %>" class="edit-input" required>
+          <span class="error-message" id="email-error"></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Телефон:</span>
+          <input type="text" name="phone" value="<%= user.phone %>" class="edit-input" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>Информация об аккаунте</h3>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">Дата регистрации:</span><span class="info-value"><%= new Date(user.registration_date).toLocaleString('ru-RU') %></span></div>
+        <div class="info-item"><span class="info-label">Статус:</span><span class="info-value"><%= user.is_moder ? 'Модератор' : 'Пользователь' %></span></div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button type="submit" class="confirm-button">Подтвердить</button>
+      <button type="button" class="cancel-button" onclick="toggleEditMode()">Отмена</button>
+    </div>
+  </div>
+</form>

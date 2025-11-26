@@ -2,7 +2,39 @@ const express = require('express');
 const { ensureAuthenticated } = require('../middlewares/auth');
 const { User, AdType, AdSpace, Template } = require('../models');
 const ExcelJS = require('exceljs');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const router = express.Router();
+
+// Настройка multer для загрузки изображений
+const uploadsDir = path.join(__dirname, '../public/images/user_images');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    // Имя файла будет установлено в обработчике создания шаблона
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Только изображения допускаются'));
+    }
+  }
+});
 
 // ДИАГНОСТИКА
 console.log('=== DIAGNOSTICS ===');
@@ -505,20 +537,30 @@ router.get('/cabinet/download-ad-spaces', ensureAuthenticated, async (req, res) 
   }
 });
 
-router.post('/cabinet/create-template', ensureAuthenticated, async (req, res) => {
+router.post('/cabinet/create-template', ensureAuthenticated, upload.single('image'), async (req, res) => {
   try {
-    const { ad_title, type_id, content_url } = req.body;
+    const { ad_title, type_id } = req.body;
     const userId = req.session.user.id;
 
     if (!ad_title || !type_id) {
+      if (req.file) {
+        fs.unlink(req.file.path, err => {
+          if (err) console.error('Error deleting file:', err);
+        });
+      }
       return res.json({ success: false, message: 'Заполните обязательные поля' });
     }
 
-    await Template.create({
+    if (!req.file) {
+      return res.json({ success: false, message: 'Загрузите изображение' });
+    }
+
+    // Создаем шаблон в базе данных
+    const template = await Template.create({
       user_id: userId,
       type_id: type_id,
       ad_title: ad_title,
-      content_url: content_url || '',
+      content_url: '', // Временно, переименуем после получения ID
       upload_date: new Date(),
       approval_status: 'pending',
       moder_id: null,
@@ -526,9 +568,33 @@ router.post('/cabinet/create-template', ensureAuthenticated, async (req, res) =>
       rejection_reason: null
     });
 
-    res.json({ success: true, message: 'Шаблон успешно создан' });
+    // Переименовываем файл с использованием ID шаблона
+    const ext = path.extname(req.file.originalname);
+    const newFilename = `pic${template.id}${ext}`;
+    const newPath = path.join(uploadsDir, newFilename);
+    const oldPath = req.file.path;
+
+    fs.rename(oldPath, newPath, (err) => {
+      if (err) {
+        console.error('Error renaming file:', err);
+        // Удаляем шаблон если не смогли переименовать файл
+        template.destroy();
+        return res.json({ success: false, message: 'Ошибка при сохранении изображения' });
+      }
+
+      // Обновляем URL в шаблоне
+      const contentUrl = `/images/user_images/${newFilename}`;
+      template.update({ content_url: contentUrl });
+
+      res.json({ success: true, message: 'Шаблон успешно создан' });
+    });
   } catch (err) {
     console.error(err);
+    if (req.file) {
+      fs.unlink(req.file.path, err => {
+        if (err) console.error('Error deleting file:', err);
+      });
+    }
     res.json({ success: false, message: 'Ошибка сервера' });
   }
 });
@@ -543,11 +609,37 @@ router.get('/cabinet/get-templates', ensureAuthenticated, async (req, res) => {
         user_id: userId,
         approval_status: status
       },
-      raw: true,
+      include: [
+        { 
+          model: require('../models').AdType, 
+          attributes: ['id', 'name', 'location', 'width', 'height'],
+          as: 'AdType'
+        }
+      ],
+      raw: false,
       order: [['upload_date', 'DESC']]
     });
 
-    res.json({ success: true, templates });
+    // Преобразуем данные для фронтенда
+    const templatesData = templates.map(t => ({
+      id: t.id,
+      ad_title: t.ad_title,
+      type_id: t.type_id,
+      content_url: t.content_url,
+      upload_date: t.upload_date,
+      approval_date: t.approval_date,
+      rejection_reason: t.rejection_reason,
+      approval_status: t.approval_status,
+      AdType: t.AdType ? {
+        id: t.AdType.id,
+        name: t.AdType.name,
+        location: t.AdType.location,
+        width: t.AdType.width,
+        height: t.AdType.height
+      } : null
+    }));
+
+    res.json({ success: true, templates: templatesData });
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Ошибка сервера' });
@@ -574,8 +666,161 @@ router.post('/cabinet/delete-template', ensureAuthenticated, async (req, res) =>
       return res.json({ success: false, message: 'Шаблон не найден или у вас нет прав на его удаление' });
     }
 
+    // Удаляем файл изображения
+    if (template.content_url) {
+      const filePath = path.join(__dirname, '../public', template.content_url);
+      fs.unlink(filePath, err => {
+        if (err) console.error('Error deleting file:', err);
+      });
+    }
+
     await template.destroy();
     res.json({ success: true, message: 'Шаблон успешно удален' });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.get('/cabinet/get-check-templates', ensureAuthenticated, async (req, res) => {
+  try {
+    const moderatorId = req.session.user.id;
+    const status = req.query.status || 'pending';
+    
+    // Проверяем, что пользователь - модератор
+    const moderator = await User.findByPk(moderatorId);
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    let where = {};
+    
+    if (status === 'pending') {
+      where = { approval_status: 'pending' };
+    } else if (status === 'approved') {
+      where = { 
+        approval_status: 'approved',
+        moder_id: moderatorId
+      };
+    } else if (status === 'rejected') {
+      where = { 
+        approval_status: 'rejected',
+        moder_id: moderatorId
+      };
+    }
+
+    const templates = await Template.findAll({
+      where: where,
+      include: [
+        { 
+          model: require('../models').AdType, 
+          attributes: ['id', 'name', 'location', 'width', 'height'],
+          as: 'AdType'
+        },
+        {
+          model: require('../models').User,
+          attributes: ['id', 'username', 'first_name', 'last_name'],
+          as: 'User'
+        }
+      ],
+      raw: false,
+      order: [['upload_date', 'DESC']]
+    });
+
+    const templatesData = templates.map(t => ({
+      id: t.id,
+      ad_title: t.ad_title,
+      type_id: t.type_id,
+      content_url: t.content_url,
+      upload_date: t.upload_date,
+      approval_date: t.approval_date,
+      rejection_reason: t.rejection_reason,
+      approval_status: t.approval_status,
+      User: t.User ? {
+        id: t.User.id,
+        username: t.User.username,
+        first_name: t.User.first_name,
+        last_name: t.User.last_name
+      } : null,
+      AdType: t.AdType ? {
+        id: t.AdType.id,
+        name: t.AdType.name,
+        location: t.AdType.location,
+        width: t.AdType.width,
+        height: t.AdType.height
+      } : null
+    }));
+
+    res.json({ success: true, templates: templatesData });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/approve-template', ensureAuthenticated, async (req, res) => {
+  try {
+    const { template_id } = req.body;
+    const moderatorId = req.session.user.id;
+
+    const moderator = await User.findByPk(moderatorId);
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const template = await Template.findByPk(template_id);
+    if (!template) {
+      return res.json({ success: false, message: 'Шаблон не найден' });
+    }
+
+    if (template.approval_status !== 'pending') {
+      return res.json({ success: false, message: 'Шаблон уже проверен' });
+    }
+
+    await template.update({
+      approval_status: 'approved',
+      moder_id: moderatorId,
+      approval_date: new Date()
+    });
+
+    res.json({ success: true, message: 'Шаблон одобрен' });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/reject-template', ensureAuthenticated, async (req, res) => {
+  try {
+    const { template_id, rejection_reason } = req.body;
+    const moderatorId = req.session.user.id;
+
+    if (!rejection_reason || !rejection_reason.trim()) {
+      return res.json({ success: false, message: 'Укажите причину отклонения' });
+    }
+
+    const moderator = await User.findByPk(moderatorId);
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const template = await Template.findByPk(template_id);
+    if (!template) {
+      return res.json({ success: false, message: 'Шаблон не найден' });
+    }
+
+    if (template.approval_status !== 'pending') {
+      return res.json({ success: false, message: 'Шаблон уже проверен' });
+    }
+
+    await template.update({
+      approval_status: 'rejected',
+      moder_id: moderatorId,
+      approval_date: new Date(),
+      rejection_reason: rejection_reason.trim()
+    });
+
+    res.json({ success: true, message: 'Шаблон отклонен' });
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Ошибка сервера' });

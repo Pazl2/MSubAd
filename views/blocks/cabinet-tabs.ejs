@@ -1,0 +1,126 @@
+<!-- Template Management -->
+<div id="manageTemplatesMode" style="display: none;">
+  <div class="cabinet-info-large">
+    <div class="tabs-wrapper">
+      <div class="tabs-header">
+        <button class="tab-button active" onclick="switchTemplateTab('create')">Создать</button>
+        <button class="tab-button" onclick="switchTemplateTab('pending')">Ожидающие проверки</button>
+        <button class="tab-button" onclick="switchTemplateTab('approved')">Одобренные</button>
+        <button class="tab-button" onclick="switchTemplateTab('rejected')">Заблокированные</button>
+      </div>
+
+      <!-- Create Tab -->
+      <div id="template-create-tab" class="tab-content active">
+        <div class="info-section">
+          <h3>Создание нового шаблона</h3>
+          <div class="form-group">
+            <label class="form-label">Название шаблона:</label>
+            <input type="text" id="templateName" class="form-input" placeholder="Введите название шаблона" onchange="updateTemplateFormState()">
+
+            <label class="form-label">Локация:</label>
+            <select id="templateLocation" class="form-select" onchange="updateTemplateLocationAndTypes()" disabled>
+              <option value="">Выберите локацию</option>
+              <option value="0">Станция</option>
+              <option value="1">Поезд</option>
+            </select>
+
+            <label class="form-label">Тип рекламы:</label>
+            <select id="templateAdType" class="form-select" onchange="updateTemplatePreview()" disabled>
+              <option value="">Выберите тип рекламы</option>
+            </select>
+
+            <label class="form-label">Ссылка на картинку:</label>
+            <input type="file" id="templateImageFile" class="form-input" accept="image/*" onchange="updateTemplatePreview()" disabled>
+
+            <label class="form-label">Предпросмотр:</label>
+            <div id="templatePreview" class="template-preview">
+              <div class="template-placeholder">Здесь будет предпросмотр вашей рекламы</div>
+            </div>
+
+            <button type="button" class="confirm-button" onclick="createTemplate()">Создать шаблон</button>
+            <span class="error-message" id="templateError"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Tab -->
+      <div id="template-pending-tab" class="tab-content">
+        <div class="info-section">
+          <h3>Ожидающие проверки</h3>
+          <div id="templatePendingList" class="templates-list"></div>
+        </div>
+      </div>
+
+      <!-- Approved Tab -->
+      <div id="template-approved-tab" class="tab-content">
+        <div class="info-section">
+          <h3>Одобренные</h3>
+          <div id="templateApprovedList" class="templates-list"></div>
+        </div>
+      </div>
+
+      <!-- Rejected Tab -->
+      <div id="template-rejected-tab" class="tab-content">
+        <div class="info-section">
+          <h3>Заблокированные</h3>
+          <div id="templateRejectedList" class="templates-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Template Check Management -->
+<div id="checkTemplatesMode" style="display: none;">
+  <div class="cabinet-info-large">
+    <div class="tabs-wrapper">
+      <div class="tabs-header">
+        <button class="tab-button active" onclick="switchCheckTab('pending')">Ожидающие проверки</button>
+        <button class="tab-button" onclick="switchCheckTab('approved')">Одобренные</button>
+        <button class="tab-button" onclick="switchCheckTab('rejected')">Отклоненные</button>
+      </div>
+
+      <!-- Pending Tab -->
+      <div id="check-pending-tab" class="tab-content active">
+        <div class="info-section">
+          <h3>Ожидающие проверки</h3>
+          <div id="checkPendingList" class="templates-list"></div>
+        </div>
+      </div>
+
+      <!-- Approved Tab -->
+      <div id="check-approved-tab" class="tab-content">
+        <div class="info-section">
+          <h3>Одобренные вами</h3>
+          <div id="checkApprovedList" class="templates-list"></div>
+        </div>
+      </div>
+
+      <!-- Rejected Tab -->
+      <div id="check-rejected-tab" class="tab-content">
+        <div class="info-section">
+          <h3>Отклоненные вами</h3>
+          <div id="checkRejectedList" class="templates-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rejection Modal -->
+<div id="rejectionModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Причина отклонения</h3>
+      <button class="modal-close" onclick="closeRejectionModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <textarea id="rejectionReason" class="form-input" placeholder="Введите причину отклонения шаблона..." rows="5"></textarea>
+      <span class="error-message" id="rejectionError"></span>
+    </div>
+    <div class="modal-footer">
+      <button class="confirm-button" onclick="submitRejection()">Отклонить</button>
+      <button class="cancel-button" onclick="closeRejectionModal()">Отмена</button>
+    </div>
+  </div>
+</div>
