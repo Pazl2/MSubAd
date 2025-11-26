@@ -30,6 +30,9 @@ AdSpace.belongsTo(AdType, { foreignKey: 'type_id' });
 Template.belongsTo(AdType, { foreignKey: 'type_id', as: 'AdType' });
 AdType.hasMany(Template, { foreignKey: 'type_id' });
 
+Template.belongsTo(User, { foreignKey: 'user_id', as: 'User' });
+User.hasMany(Template, { foreignKey: 'user_id' });
+
 module.exports = {
   sequelize,
   Sequelize,

@@ -595,3 +595,56 @@ function updateNavLink(page) {
     }
   }
 }
+
+function renderTemplates(templates, status) {
+  const listId = `template${status.charAt(0).toUpperCase() + status.slice(1)}List`;
+  const listElement = document.getElementById(listId);
+  
+  if (!listElement) return;
+  
+  if (templates.length === 0) {
+    listElement.innerHTML = '<p style="color: #999; text-align: center;">Нет шаблонов для отображения</p>';
+    return;
+  }
+  
+  listElement.innerHTML = templates.map(template => {
+    // Расчет размеров с сохранением пропорций
+    const maxWidth = 400;
+    const maxHeight = 300;
+    let width = template.AdType ? template.AdType.width : maxWidth;
+    let height = template.AdType ? template.AdType.height : maxHeight;
+    
+    // Масштабируем если превышает максимум
+    const scale = Math.min(maxWidth / width, maxHeight / height, 1);
+    const displayWidth = Math.round(width * scale);
+    const displayHeight = Math.round(height * scale);
+    
+    return `
+    <div class="template-item">
+      <div class="template-item-header">
+        <h4>${escapeHtml(template.ad_title)}</h4>
+        <span class="template-status ${template.approval_status}">${getStatusText(template.approval_status)}</span>
+      </div>
+      
+      <div class="template-item-content">
+        <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px;">
+          <img src="${escapeHtml(template.content_url)}" alt="Preview" onerror="this.src='/images/placeholder.png'">
+        </div>
+      </div>
+      
+      <div class="template-item-info">
+        <p><strong>Тип:</strong> ${escapeHtml(template.AdType ? template.AdType.name : 'Неизвестно')}</p>
+        <p><strong>Размер:</strong> ${template.AdType ? template.AdType.width + 'x' + template.AdType.height + 'px' : 'Неизвестно'}</p>
+        <p><strong>Локация:</strong> ${template.AdType ? (template.AdType.location ? 'Поезд' : 'Станция') : 'Неизвестно'}</p>
+        <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
+        ${template.approval_date ? `<p><strong>Дата проверки:</strong> ${new Date(template.approval_date).toLocaleString('ru-RU')}</p>` : ''}
+        ${template.rejection_reason ? `<p><strong>Причина отклонения:</strong> ${escapeHtml(template.rejection_reason)}</p>` : ''}
+      </div>
+      
+      <div class="template-item-actions">
+        <button class="confirm-button delete-button" onclick="deleteTemplate(${template.id})">🗑 Удалить</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+}

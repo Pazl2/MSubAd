@@ -646,12 +646,13 @@ body{
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto;
 }
 
 .template-preview-image-container img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
 }
 
