@@ -329,22 +329,24 @@ function loadCheckTemplatesByStatus(status) {
 function renderTemplateCard(template, container, status, isModeration) {
   const item = document.createElement('div');
   item.className = 'template-item';
-  
+
   let displayWidth = 350;
   let displayHeight = 350;
   let adTypeName = 'Неизвестный тип';
   let adTypeLocation = 'Неизвестная локация';
-  
+  let adTypeSize = 'Неизвестный размер';
+
   if (window.allAdTypes) {
     const adType = window.allAdTypes.find(t => t.id === template.type_id);
     if (adType) {
       adTypeName = adType.name;
       adTypeLocation = adType.location ? 'Поезд' : 'Станция';
-      
+      adTypeSize = `${adType.width}x${adType.height}px`;
+
       const width = parseInt(adType.width) || 100;
       const height = parseInt(adType.height) || 50;
       const aspectRatio = width / height;
-      
+
       const maxSize = 550;
       if (width > height) {
         displayWidth = maxSize;
@@ -355,7 +357,7 @@ function renderTemplateCard(template, container, status, isModeration) {
       }
     }
   }
-  
+
   let imageHtml = '';
   if (template.content_url) {
     imageHtml = `
@@ -366,11 +368,11 @@ function renderTemplateCard(template, container, status, isModeration) {
   } else {
     imageHtml = '<p style="color: #999;">Изображение не загружено</p>';
   }
-  
+
   let actionsHtml = '';
   if (isModeration) {
     let userInfo = template.User ? `${template.User.first_name} ${template.User.last_name} (@${template.User.username})` : 'Неизвестный пользователь';
-    
+
     if (status === 'pending') {
       actionsHtml = `
         <div class="template-item-header">
@@ -384,6 +386,7 @@ function renderTemplateCard(template, container, status, isModeration) {
         <div class="template-item-info">
           <p><strong>Тип рекламы:</strong> ${adTypeName}</p>
           <p><strong>Локация:</strong> ${adTypeLocation}</p>
+          <p><strong>Размер:</strong> ${adTypeSize}</p>
           <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
         </div>
         <div class="template-item-actions">
@@ -404,6 +407,7 @@ function renderTemplateCard(template, container, status, isModeration) {
         <div class="template-item-info">
           <p><strong>Тип рекламы:</strong> ${adTypeName}</p>
           <p><strong>Локация:</strong> ${adTypeLocation}</p>
+          <p><strong>Размер:</strong> ${adTypeSize}</p>
           <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
         </div>
         <div class="template-item-actions">
@@ -423,6 +427,7 @@ function renderTemplateCard(template, container, status, isModeration) {
         <div class="template-item-info">
           <p><strong>Тип рекламы:</strong> ${adTypeName}</p>
           <p><strong>Локация:</strong> ${adTypeLocation}</p>
+          <p><strong>Размер:</strong> ${adTypeSize}</p>
           <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
         </div>
         <div class="template-item-actions">
@@ -440,6 +445,7 @@ function renderTemplateCard(template, container, status, isModeration) {
       <div class="template-item-info">
         <p><strong>Тип рекламы:</strong> ${adTypeName}</p>
         <p><strong>Локация:</strong> ${adTypeLocation}</p>
+        <p><strong>Размер:</strong> ${adTypeSize}</p>
         <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
         ${template.approval_date ? `<p><strong>Дата проверки:</strong> ${new Date(template.approval_date).toLocaleString('ru-RU')}</p>` : ''}
         ${template.rejection_reason ? `<p><strong>Причина отклонения:</strong> ${template.rejection_reason}</p>` : ''}

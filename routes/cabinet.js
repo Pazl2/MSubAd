@@ -1,6 +1,7 @@
 const express = require('express');
 const { ensureAuthenticated } = require('../middlewares/auth');
-const { User, AdType, AdSpace, Template } = require('../models');
+const { User, AdType, AdSpace, Template, Sequelize } = require('../models'); // Добавляем Sequelize
+const { Op } = Sequelize; // Импортируем Op для использования в запросах
 const ExcelJS = require('exceljs');
 const multer = require('multer');
 const path = require('path');
@@ -57,11 +58,21 @@ if (typeof ensureAuthenticated !== 'function') {
     try {
       const username = req.session.user.username;
       const user = await User.findOne({ where: { username } });
+
       if (!user) {
         req.flash('error', 'User not found');
         return res.redirect('/login');
       }
-      res.render('cabinet', { user });
+
+      // Если пользователь модератор, подсчитываем количество проверенных реклам
+      let checkedAdsCount = 0;
+      if (user.is_moder) {
+        checkedAdsCount = await Template.count({
+          where: { moder_id: user.id, approval_status: { [Op.in]: ['approved', 'rejected'] } }
+        });
+      }
+
+      res.render('cabinet', { user: { ...user.toJSON(), checkedAdsCount } });
     } catch (err) {
       console.error(err);
       req.flash('error', 'Ошибка сервера');

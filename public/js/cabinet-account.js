@@ -67,3 +67,30 @@ function showAccount() {
   document.getElementById('pageTitle').textContent = 'Личный кабинет';
   updateNavLink('account');
 }
+
+// Инициализация шаблона при загрузке страницы из каталога
+document.addEventListener('DOMContentLoaded', function() {
+  initializeAdTypes();
+  showCreateTemplate();
+});
+
+function fillTemplateForm(adType) {
+  if (!window.allAdTypes || window.allAdTypes.length === 0) {
+    console.error('Ad types not loaded yet');
+    return;
+  }
+  
+  const selectedType = window.allAdTypes.find(t => t.id === adType.id);
+  if (selectedType) {
+    document.getElementById('templateName').value = adType.name || '';
+    document.getElementById('templateLocation').value = selectedType.location ? '1' : '0';
+    document.getElementById('templateLocation').disabled = false;
+    
+    updateTemplateLocationAndTypes();
+    
+    setTimeout(() => {
+      document.getElementById('templateAdType').value = adType.id;
+      updateTemplatePreview();
+    }, 100);
+  }
+}

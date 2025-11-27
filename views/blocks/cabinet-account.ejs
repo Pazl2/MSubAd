@@ -21,8 +21,20 @@
   <div class="info-section">
     <h3>Информация об аккаунте</h3>
     <div class="info-grid">
-      <div class="info-item"><span class="info-label">Дата регистрации:</span><span class="info-value"><%= new Date(user.registration_date).toLocaleString('ru-RU') %></span></div>
-      <div class="info-item"><span class="info-label">Статус:</span><span class="info-value"><%= user.is_moder ? 'Модератор' : 'Пользователь' %></span></div>
+      <div class="info-item">
+        <span class="info-label">Дата регистрации:</span>
+        <span class="info-value"><%= new Date(user.registration_date).toLocaleString('ru-RU') %></span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Статус:</span>
+        <span class="info-value"><%= user.is_moder ? 'Модератор' : 'Пользователь' %></span>
+      </div>
+      <% if (user.is_moder) { %>
+        <div class="info-item">
+          <span class="info-label">Проверено реклам:</span>
+          <span class="info-value"><%= user.checkedAdsCount %></span>
+        </div>
+      <% } %>
     </div>
   </div>
 

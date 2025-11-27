@@ -71,12 +71,14 @@ function renderCheckTemplates(templates, status) {
   listElement.innerHTML = templates.map(template => {
     let adTypeName = 'Неизвестный тип';
     let adTypeLocation = 'Неизвестная локация';
+    let adTypeSize = 'Неизвестный размер';
     let displayWidth = 350;
     let displayHeight = 350;
 
     if (template.AdType) {
       adTypeName = template.AdType.name;
       adTypeLocation = template.AdType.location ? 'Поезд' : 'Станция';
+      adTypeSize = `${template.AdType.width}x${template.AdType.height}px`;
 
       const width = parseInt(template.AdType.width) || 100;
       const height = parseInt(template.AdType.height) || 50;
@@ -113,6 +115,7 @@ function renderCheckTemplates(templates, status) {
         <div class="template-item-info">
           <p><strong>Тип рекламы:</strong> ${adTypeName}</p>
           <p><strong>Локация:</strong> ${adTypeLocation}</p>
+          <p><strong>Размер:</strong> ${adTypeSize}</p>
           <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
           ${template.rejection_reason ? `<p><strong>Причина отклонения:</strong> ${template.rejection_reason}</p>` : ''}
         </div>

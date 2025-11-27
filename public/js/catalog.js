@@ -47,6 +47,15 @@ class CatalogManager {
         const sid = stationBtn.getAttribute('data-station-id');
         if(sid) this.loadStation(sid);
       }
+      const orderBtn = e.target.closest('.order-btn');
+      if (orderBtn) {
+        const adCard = orderBtn.closest('.ad-card');
+        const adTypeId = adCard.getAttribute('data-ad-type-id');
+        const adTypeName = adCard.getAttribute('data-ad-type-name');
+        if (adTypeId && adTypeName) {
+          this.orderAd(adTypeId, adTypeName);
+        }
+      }
     });
   }
 
@@ -103,7 +112,7 @@ class CatalogManager {
       const loc = a.location ? 'train' : 'metro';
       const searchText = this.escape((a.name || '') + ' ' + (a.description || ''));
       return `
-        <article class="ad-card" tabindex="0" style="animation-delay:${idx * 40}ms" data-location="${loc}" data-search="${searchText}">
+        <article class="ad-card" tabindex="0" style="animation-delay:${idx * 40}ms" data-location="${loc}" data-search="${searchText}" data-ad-type-id="${a.id}" data-ad-type-name="${this.escape(a.name)}">
           ${imgBlock}
           <div class="ad-card__body">
             <div class="ad-card__meta">
@@ -113,7 +122,9 @@ class CatalogManager {
             <div class="ad-card__footer">
               <div class="ad-card__price">${price}</div>
             </div>
-            <div class="ad-card__actions"><button class="btn btn--ghost" type="button">Заказать</button></div>
+            <div class="ad-card__actions">
+              <button class="btn btn--ghost order-btn" type="button" data-ad-id="${a.id}" data-ad-name="${this.escape(a.name)}">Заказать</button>
+            </div>
           </div>
         </article>
       `;
@@ -236,6 +247,11 @@ class CatalogManager {
       .replace(/>/g,'&gt;')
       .replace(/"/g,'&quot;')
       .replace(/'/g,'&#39;');
+  }
+
+  orderAd(adTypeId, adTypeName) {
+    // Просто перенаправляем в кабинет на создание шаблона
+    window.location.href = '/cabinet';
   }
 }
 
