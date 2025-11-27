@@ -37,8 +37,6 @@ function showManageAdSpaces() {
   loadAdSpacesOptions();
 }
 
-// ...existing code... (downloadUsersDatabase, loadAdTypes, selectAdType, addAdType, updateAdType, deleteAdType, loadAdSpacesOptions, updateSpaceOptions, onSpaceTypeChange, updateSpaceStationsOrTrains, addAdSpaces, deleteAdSpaces)
-
 function downloadUsersDatabase() {
   fetch('/cabinet/download-users')
     .then(response => {
@@ -523,4 +521,69 @@ function clearAdTypeForm() {
   document.getElementById('adTypeBasePrice').value = '';
   document.getElementById('adTypeError').textContent = '';
   delete document.getElementById('adTypeName').dataset.adTypeId;
+}
+
+function changeUserRole() {
+  const username = document.getElementById('changeRoleUsername').value.trim();
+  const role = document.getElementById('roleSelect').value;
+  const errorEl = document.getElementById('changeRoleError');
+  errorEl.textContent = '';
+
+  if (!username) {
+    errorEl.textContent = 'Введите логин пользователя';
+    return;
+  }
+
+  fetch('/cabinet/change-role', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, role })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        document.getElementById('changeRoleUsername').value = '';
+      } else {
+        errorEl.textContent = data.message;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      errorEl.textContent = 'Ошибка сервера';
+    });
+}
+
+function deleteUser() {
+  const username = document.getElementById('deleteUsername').value.trim();
+  const errorEl = document.getElementById('deleteUserError');
+  errorEl.textContent = '';
+
+  if (!username) {
+    errorEl.textContent = 'Введите логин пользователя';
+    return;
+  }
+
+  if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+    return;
+  }
+
+  fetch('/cabinet/delete-user', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        document.getElementById('deleteUsername').value = '';
+      } else {
+        errorEl.textContent = data.message;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      errorEl.textContent = 'Ошибка сервера';
+    });
 }

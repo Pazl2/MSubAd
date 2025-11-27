@@ -60,55 +60,71 @@ function loadCheckTemplates(status) {
 function renderCheckTemplates(templates, status) {
   const listId = `check${status.charAt(0).toUpperCase() + status.slice(1)}List`;
   const listElement = document.getElementById(listId);
-  
+
   if (!listElement) return;
-  
+
   if (templates.length === 0) {
     listElement.innerHTML = '<p style="color: #999; text-align: center;">Нет шаблонов для отображения</p>';
     return;
   }
-  
-  listElement.innerHTML = templates.map((template, index) => {
-    const maxWidth = 700;
-    const maxHeight = 700;
-    let width = template.AdType ? template.AdType.width : maxWidth;
-    let height = template.AdType ? template.AdType.height : maxHeight;
-    
-    const scale = Math.min(maxWidth / width, maxHeight / height, 1);
-    const displayWidth = Math.round(width * scale);
-    const displayHeight = Math.round(height * scale);
-    
+
+  listElement.innerHTML = templates.map(template => {
+    let adTypeName = 'Неизвестный тип';
+    let adTypeLocation = 'Неизвестная локация';
+    let displayWidth = 350;
+    let displayHeight = 350;
+
+    if (template.AdType) {
+      adTypeName = template.AdType.name;
+      adTypeLocation = template.AdType.location ? 'Поезд' : 'Станция';
+
+      const width = parseInt(template.AdType.width) || 100;
+      const height = parseInt(template.AdType.height) || 50;
+      const aspectRatio = width / height;
+
+      const maxSize = 550;
+      if (width > height) {
+        displayWidth = maxSize;
+        displayHeight = maxSize / aspectRatio;
+      } else {
+        displayHeight = maxSize;
+        displayWidth = maxSize * aspectRatio;
+      }
+    }
+
+    let imageHtml = '';
+    if (template.content_url) {
+      imageHtml = `
+        <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px; margin: 0 auto;">
+          <img src="${template.content_url}" alt="Template" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      `;
+    } else {
+      imageHtml = '<p style="color: #999;">Изображение не загружено</p>';
+    }
+
     return `
-    <div class="template-item">
-      <div class="template-item-header">
-        <h4>${escapeHtml(template.ad_title)}</h4>
-        <span class="template-status ${template.approval_status}">${getStatusText(template.approval_status)}</span>
-      </div>
-      
-      <div class="template-item-content">
-        <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px;">
-          <img src="${escapeHtml(template.content_url)}" alt="Preview" onerror="this.src='/images/placeholder.png'">
+      <div class="template-item">
+        <div class="template-item-header">
+          <h4>${template.ad_title}</h4>
+          <span class="template-status ${status}">${getStatusText(status)}</span>
+        </div>
+        <div class="template-item-content">${imageHtml}</div>
+        <div class="template-item-info">
+          <p><strong>Тип рекламы:</strong> ${adTypeName}</p>
+          <p><strong>Локация:</strong> ${adTypeLocation}</p>
+          <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
+          ${template.rejection_reason ? `<p><strong>Причина отклонения:</strong> ${template.rejection_reason}</p>` : ''}
+        </div>
+        <div class="template-item-actions">
+          ${status === 'pending' ? `
+            <button class="confirm-button" onclick="approveCheckTemplate(${template.id})">✓ Одобрить</button>
+            <button class="confirm-button delete-button" onclick="openRejectionModalForCheck(${template.id})">✗ Отклонить</button>
+          ` : ''}
         </div>
       </div>
-      
-      <div class="template-item-info">
-        <p><strong>Автор:</strong> ${escapeHtml(template.User ? template.User.first_name + ' ' + template.User.last_name + ' (' + template.User.username + ')' : 'Неизвестно')}</p>
-        <p><strong>Тип:</strong> ${escapeHtml(template.AdType ? template.AdType.name : 'Неизвестно')}</p>
-        <p><strong>Размер:</strong> ${template.AdType ? template.AdType.width + 'x' + template.AdType.height + 'px' : 'Неизвестно'}</p>
-        <p><strong>Локация:</strong> ${template.AdType ? (template.AdType.location ? 'Поезд' : 'Станция') : 'Неизвестно'}</p>
-        <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
-        ${template.approval_date ? `<p><strong>Дата проверки:</strong> ${new Date(template.approval_date).toLocaleString('ru-RU')}</p>` : ''}
-        ${template.rejection_reason ? `<p><strong>Причина отклонения:</strong> ${escapeHtml(template.rejection_reason)}</p>` : ''}
-      </div>
-      
-      <div class="template-item-actions">
-        ${status === 'pending' ? `
-          <button class="confirm-button" onclick="approveCheckTemplate(${template.id})">✓ Одобрить</button>
-          <button class="confirm-button delete-button" onclick="openRejectionModalForCheck(${template.id})">✗ Отклонить</button>
-        ` : ''}
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function approveCheckTemplate(templateId) {
