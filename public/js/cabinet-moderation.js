@@ -6,6 +6,7 @@ function showManageUsers() {
   document.getElementById('manageAdSpacesMode').style.display = 'none';
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'none';
+  document.getElementById('manageAuditLogsMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Управление пользователями';
   updateNavLink('manage-users');
   clearAdTypeForm();
@@ -19,6 +20,7 @@ function showManageAdTypes() {
   document.getElementById('manageAdSpacesMode').style.display = 'none';
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'none';
+  document.getElementById('manageAuditLogsMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Управление типами рекламы';
   updateNavLink('manage-ad-types');
   loadAdTypes();
@@ -32,6 +34,7 @@ function showManageAdSpaces() {
   document.getElementById('manageAdSpacesMode').style.display = 'block';
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'none';
+  document.getElementById('manageAuditLogsMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Управление рекламными местами';
   updateNavLink('manage-ad-spaces');
   loadAdSpacesOptions();
@@ -586,4 +589,177 @@ function deleteUser() {
       console.error(err);
       errorEl.textContent = 'Ошибка сервера';
     });
+}
+
+function showManageAuditLogs() {
+  // Скрываем все остальные разделы
+  document.getElementById('viewMode').style.display = 'none';
+  document.getElementById('editMode').style.display = 'none';
+  document.getElementById('manageUsersMode').style.display = 'none';
+  document.getElementById('manageAdTypesMode').style.display = 'none';
+  document.getElementById('manageAdSpacesMode').style.display = 'none';
+  document.getElementById('manageTemplatesMode').style.display = 'none';
+  document.getElementById('checkTemplatesMode').style.display = 'none';
+  document.getElementById('manageAuditLogsMode').style.display = 'block';
+  document.getElementById('pageTitle').textContent = 'История изменений';
+  
+  // Обновляем активную ссылку в навигации
+  updateNavLink('audit-logs');
+  
+  // Загружаем логи
+  loadAuditLogs();
+}
+
+let currentAuditPage = 1;
+let auditLogs = [];
+let filteredLogs = [];
+
+function loadAuditLogs() {
+  fetch(`/cabinet/get-audit-logs?page=${currentAuditPage}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        auditLogs = data.logs;
+        filteredLogs = data.logs;
+        renderAuditLogs();
+        updatePaginationInfo(data.currentPage, data.pages);
+      } else {
+        console.error('Ошибка загрузки:', data.message);
+        document.getElementById('auditLogsList').innerHTML = '<p style="color: #999;">Ошибка загрузки истории</p>';
+      }
+    })
+    .catch(err => {
+      console.error('Ошибка:', err);
+      document.getElementById('auditLogsList').innerHTML = '<p style="color: #999;">Ошибка загрузки истории</p>';
+    });
+}
+
+function renderAuditLogs() {
+  const container = document.getElementById('auditLogsList');
+  
+  if (!filteredLogs || filteredLogs.length === 0) {
+    container.innerHTML = '<p style="color: #999; text-align: center;">История не найдена</p>';
+    return;
+  }
+
+  container.innerHTML = filteredLogs.map(log => {
+    const operationColors = {
+      'INSERT': '#4CAF50',
+      'UPDATE': '#2196F3',
+      'DELETE': '#f44336'
+    };
+
+    const operationEmoji = {
+      'INSERT': '➕',
+      'UPDATE': '✏️',
+      'DELETE': '🗑️'
+    };
+
+    const oldValues = log.old_values ? JSON.stringify(log.old_values, null, 2) : 'N/A';
+    const newValues = log.new_values ? JSON.stringify(log.new_values, null, 2) : 'N/A';
+
+    return `
+      <div class="audit-log-item">
+        <div class="audit-log-header" onclick="toggleAuditDetails(this)">
+          <div class="audit-log-main">
+            <span class="audit-operation" style="background-color: ${operationColors[log.operation]}">
+              ${operationEmoji[log.operation]} ${log.operation}
+            </span>
+            <span class="audit-table"><strong>Таблица:</strong> ${log.table_name}</span>
+            <span class="audit-id"><strong>ID:</strong> ${log.record_id || 'N/A'}</span>
+          </div>
+          <div class="audit-timestamp">
+            <small>${new Date(log.timestamp).toLocaleString('ru-RU')}</small>
+          </div>
+        </div>
+        <div class="audit-details" style="display: none;">
+          ${log.old_values ? `
+            <div class="audit-section">
+              <h4>Старые значения:</h4>
+              <pre><code>${escapeHtml(oldValues)}</code></pre>
+            </div>
+          ` : ''}
+          ${log.new_values ? `
+            <div class="audit-section">
+              <h4>Новые значения:</h4>
+              <pre><code>${escapeHtml(newValues)}</code></pre>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleAuditDetails(element) {
+  const details = element.nextElementSibling;
+  if (details) {
+    details.style.display = details.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
+function filterAuditLogs() {
+  const tableFilter = document.getElementById('auditTableFilter').value;
+  const operationFilter = document.getElementById('auditOperationFilter').value;
+
+  filteredLogs = auditLogs.filter(log => {
+    const matchTable = !tableFilter || log.table_name === tableFilter;
+    const matchOperation = !operationFilter || log.operation === operationFilter;
+    return matchTable && matchOperation;
+  });
+
+  currentAuditPage = 1;
+  renderAuditLogs();
+}
+
+function updatePaginationInfo(currentPage, totalPages) {
+  document.getElementById('pageInfo').textContent = `Страница ${currentPage} из ${totalPages}`;
+  document.getElementById('prevPageBtn').disabled = currentPage === 1;
+  document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+}
+
+function prevAuditPage() {
+  if (currentAuditPage > 1) {
+    currentAuditPage--;
+    loadAuditLogs();
+  }
+}
+
+function nextAuditPage() {
+  currentAuditPage++;
+  loadAuditLogs();
+}
+
+function downloadAuditLogs() {
+  fetch('/cabinet/download-audit-logs')
+    .then(response => {
+      if (!response.ok) throw new Error('Ошибка при скачивании');
+      return response.blob();
+    })
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'audit_logs.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Ошибка при скачивании истории');
+    });
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
 }

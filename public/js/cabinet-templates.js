@@ -19,6 +19,7 @@ function showCreateTemplate() {
   document.getElementById('manageAdSpacesMode').style.display = 'none';
   document.getElementById('manageTemplatesMode').style.display = 'block';
   document.getElementById('checkTemplatesMode').style.display = 'none';
+  document.getElementById('manageAuditLogsMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Создать шаблон';
   updateNavLink('create-template');
   loadTemplateAdTypes();
@@ -33,6 +34,7 @@ function showCheckTemplates() {
   document.getElementById('manageAdSpacesMode').style.display = 'none';
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'block';
+  document.getElementById('manageAuditLogsMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Проверка рекламы';
   updateNavLink('check-templates');
   loadCheckTemplates();
@@ -472,7 +474,7 @@ function deleteTemplate(templateId) {
     body: JSON.stringify({ template_id: templateId })
   })
   .then(res => res.json())
-  .then(data => {
+  .then (data => {
     if (data.success) {
       alert('Шаблон успешно удален');
       loadTemplates();
@@ -567,39 +569,44 @@ function getStatusText(status) {
 }
 
 function updateNavLink(page) {
-  const links = document.querySelectorAll('.cabinet-nav .nav-link');
-  links.forEach(link => link.classList.remove('active'));
+  // Убираем активный класс со всех ссылок в навигации
+  const allLinks = document.querySelectorAll('.cabinet-nav .nav-link');
+  allLinks.forEach(link => link.classList.remove('active'));
   
+  // Активируем нужную ссылку в зависимости от страницы
   if (page === 'account') {
-    const accountLink = document.querySelector('.cabinet-nav .nav-menu .nav-item:first-child .nav-link');
-    if (accountLink) {
-      accountLink.classList.add('active');
-    }
-  } else if (page === 'manage-users') {
-    const manageLink = Array.from(links).find(link => link.textContent.includes('Управление пользователями'));
-    if (manageLink) {
-      manageLink.classList.add('active');
-    }
-  } else if (page === 'manage-ad-types') {
-    const manageAdTypesLink = Array.from(links).find(link => link.textContent.includes('Управление типами рекламы'));
-    if (manageAdTypesLink) {
-      manageAdTypesLink.classList.add('active');
-    }
-  } else if (page === 'manage-ad-spaces') {
-    const manageAdSpacesLink = Array.from(links).find(link => link.textContent.includes('Управление рекламными местами'));
-    if (manageAdSpacesLink) {
-      manageAdSpacesLink.classList.add('active');
-    }
+    // Первая ссылка - Аккаунт
+    const links = document.querySelectorAll('.cabinet-nav .nav-menu .nav-item .nav-link');
+    if (links[0]) links[0].classList.add('active');
   } else if (page === 'create-template') {
-    const createTemplateLink = Array.from(links).find(link => link.textContent.includes('Создать шаблон'));
-    if (createTemplateLink) {
-      createTemplateLink.classList.add('active');
-    }
+    // Вторая ссылка - Создать шаблон
+    const links = document.querySelectorAll('.cabinet-nav .nav-menu .nav-item .nav-link');
+    if (links[1]) links[1].classList.add('active');
+  } else if (page === 'manage-users') {
+    const manageUsersLink = Array.from(allLinks).find(link => 
+      link.textContent.trim().includes('Управление пользователями')
+    );
+    if (manageUsersLink) manageUsersLink.classList.add('active');
+  } else if (page === 'manage-ad-types') {
+    const manageAdTypesLink = Array.from(allLinks).find(link => 
+      link.textContent.trim().includes('Управление типами рекламы')
+    );
+    if (manageAdTypesLink) manageAdTypesLink.classList.add('active');
+  } else if (page === 'manage-ad-spaces') {
+    const manageAdSpacesLink = Array.from(allLinks).find(link => 
+      link.textContent.trim().includes('Управление рекламными местами')
+    );
+    if (manageAdSpacesLink) manageAdSpacesLink.classList.add('active');
   } else if (page === 'check-templates') {
-    const checkLink = Array.from(links).find(link => link.textContent.includes('Проверка рекламы'));
-    if (checkLink) {
-      checkLink.classList.add('active');
-    }
+    const checkLink = Array.from(allLinks).find(link => 
+      link.textContent.trim().includes('Проверка рекламы')
+    );
+    if (checkLink) checkLink.classList.add('active');
+  } else if (page === 'audit-logs') {
+    const auditLink = Array.from(allLinks).find(link => 
+      link.textContent.trim().includes('История изменений')
+    );
+    if (auditLink) auditLink.classList.add('active');
   }
 }
 
@@ -610,48 +617,77 @@ function renderTemplates(templates, status) {
   if (!listElement) return;
   
   if (templates.length === 0) {
-    listElement.innerHTML = '<p style="color: #999; text-align: center;">Нет шаблонов для отображения</p>';
+    listElement.innerHTML = `<p style="color: #999;">Шаблонов со статусом "${getStatusText(status)}" не найдено</p>`;
     return;
   }
-  
-  listElement.innerHTML = templates.map(template => {
-    // Расчет размеров с сохранением пропорций
-    const maxWidth = 400;
-    const maxHeight = 300;
-    let width = template.AdType ? template.AdType.width : maxWidth;
-    let height = template.AdType ? template.AdType.height : maxHeight;
-    
-    // Масштабируем если превышает максимум
-    const scale = Math.min(maxWidth / width, maxHeight / height, 1);
-    const displayWidth = Math.round(width * scale);
-    const displayHeight = Math.round(height * scale);
-    
-    return `
-    <div class="template-item">
-      <div class="template-item-header">
-        <h4>${escapeHtml(template.ad_title)}</h4>
-        <span class="template-status ${template.approval_status}">${getStatusText(template.approval_status)}</span>
-      </div>
-      
-      <div class="template-item-content">
-        <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм;">
-          <img src="${escapeHtml(template.content_url)}" alt="Preview" onerror="this.src='/images/placeholder.png'">
-        </div>
-      </div>
-      
-      <div class="template-item-info">
-        <p><strong>Тип:</strong> ${escapeHtml(template.AdType ? template.AdType.name : 'Неизвестно')}</p>
-        <p><strong>Размер:</strong> ${template.AdType ? template.AdType.width + 'x' + template.AdType.height + ' мм' : 'Неизвестно'}</p>
-        <p><strong>Локация:</strong> ${template.AdType ? (template.AdType.location ? 'Поезд' : 'Станция') : 'Неизвестно'}</p>
-        <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
-        ${template.approval_date ? `<p><strong>Дата проверки:</strong> ${new Date(template.approval_date).toLocaleString('ru-RU')}</p>` : ''}
-        ${template.rejection_reason ? `<p><strong>Причина отклонения:</strong> ${escapeHtml(template.rejection_reason)}</p>` : ''}
-      </div>
-      
-      <div class="template-item-actions">
-        <button class="confirm-button delete-button" onclick="deleteTemplate(${template.id})">🗑 Удалить</button>
-      </div>
-    </div>
-  `;
-  }).join('');
+
+  listElement.innerHTML = '';
+  templates.forEach(template => {
+    renderTemplateCard(template, listElement, status, false);
+  });
 }
+
+// Обработчик изменения файла изображения
+document.addEventListener('DOMContentLoaded', function() {
+  const templateImageFile = document.getElementById('templateImageFile');
+  
+  if (templateImageFile) {
+    templateImageFile.addEventListener('change', function() {
+      const file = this.files[0];
+      const errorEl = document.getElementById('templateError');
+      errorEl.textContent = '';
+
+      if (file) {
+        const maxSizeInMB = 2;
+        const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+        if (file.size > maxSizeInBytes) {
+          errorEl.textContent = `Размер файла не должен превышать ${maxSizeInMB} МБ`;
+          this.value = '';
+          updateTemplatePreview();
+          return;
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+          errorEl.textContent = 'Допустимые форматы изображений: JPEG, PNG, GIF';
+          this.value = '';
+          updateTemplatePreview();
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const width = img.width;
+            const height = img.height;
+            const aspectRatio = width / height;
+
+            const maxWidth = 800;
+            const maxHeight = 800;
+            let displayWidth, displayHeight;
+
+            if (width > height) {
+              displayWidth = maxWidth;
+              displayHeight = maxWidth / aspectRatio;
+            } else {
+              displayHeight = maxHeight;
+              displayWidth = maxHeight * aspectRatio;
+            }
+
+            const previewDiv = document.getElementById('templatePreview');
+            previewDiv.innerHTML = `
+              <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм;">
+                <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+            `;
+          };
+        };
+        reader.readAsDataURL(file);
+      } else {
+        updateTemplatePreview();
+      }
+    });
+  }
+});

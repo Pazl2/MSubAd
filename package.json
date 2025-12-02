@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "MSubAd rewritten in Node.js + Express + EJS",
   "main": "app.js",
+  
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "seed": "node seed/seed.js"
+    "seed": "node seed/seed.js",
+    "init-triggers": "node scripts/init-triggers.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

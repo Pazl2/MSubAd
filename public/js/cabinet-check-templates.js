@@ -2,11 +2,13 @@ let currentPendingTemplateId = null;
 
 function showCheckTemplates() {
   document.getElementById('viewMode').style.display = 'none';
+  document.getElementById('editMode').style.display = 'none';
   document.getElementById('manageUsersMode').style.display = 'none';
   document.getElementById('manageAdTypesMode').style.display = 'none';
   document.getElementById('manageAdSpacesMode').style.display = 'none';
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'block';
+  document.getElementById('manageAuditLogsMode').style.display = 'none';
   
   // Активируем кнопку в меню
   document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));

@@ -1,6 +1,6 @@
 const express = require('express');
 const { ensureAuthenticated } = require('../middlewares/auth');
-const { User, AdType, AdSpace, Template, Sequelize } = require('../models'); // Добавляем Sequelize
+const { User, AdType, AdSpace, Template, Sequelize, AuditLog } = require('../models'); // Добавляем Sequelize и AuditLog
 const { Op } = Sequelize; // Импортируем Op для использования в запросах
 const ExcelJS = require('exceljs');
 const multer = require('multer');
@@ -835,6 +835,91 @@ router.post('/cabinet/reject-template', ensureAuthenticated, async (req, res) =>
   } catch (err) {
     console.error(err);
     res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.get('/cabinet/get-audit-logs', ensureAuthenticated, async (req, res) => {
+  try {
+    const moderatorUsername = req.session.user.username;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const { count, rows } = await AuditLog.findAndCountAll({
+      offset: offset,
+      limit: limit,
+      order: [['timestamp', 'DESC']]
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.json({ 
+      success: true, 
+      logs: rows,
+      currentPage: page,
+      pages: totalPages
+    });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.get('/cabinet/download-audit-logs', ensureAuthenticated, async (req, res) => {
+  try {
+    const moderatorUsername = req.session.user.username;
+
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.status(403).json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const logs = await AuditLog.findAll({
+      order: [['timestamp', 'DESC']],
+      raw: true
+    });
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('История изменений');
+
+    worksheet.columns = [
+      { header: 'ID', key: 'id', width: 10 },
+      { header: 'Таблица', key: 'table_name', width: 20 },
+      { header: 'Операция', key: 'operation', width: 12 },
+      { header: 'ID записи', key: 'record_id', width: 12 },
+      { header: 'Дата и время', key: 'timestamp', width: 20 },
+      { header: 'Старые значения', key: 'old_values', width: 40 },
+      { header: 'Новые значения', key: 'new_values', width: 40 }
+    ];
+
+    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC62828' } };
+
+    logs.forEach(log => {
+      worksheet.addRow({
+        id: log.id,
+        table_name: log.table_name,
+        operation: log.operation,
+        record_id: log.record_id,
+        timestamp: new Date(log.timestamp).toLocaleString('ru-RU'),
+        old_values: log.old_values ? JSON.stringify(log.old_values) : '-',
+        new_values: log.new_values ? JSON.stringify(log.new_values) : '-'
+      });
+    });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="audit_logs.xlsx"');
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
 

@@ -697,3 +697,102 @@ body{
     background-color: #b71c1c;
     transform: translateY(-2px);
 }
+
+/* ================================
+   Стили для логов аудита
+================================ */
+.audit-logs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.audit-log-item {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.audit-log-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.audit-log-header {
+    padding: 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+}
+
+.audit-log-main {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.audit-operation {
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.audit-table {
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.audit-id {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.audit-timestamp {
+    color: #999;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.audit-details {
+    padding: 15px;
+    background: #f5f5f5;
+    border-top: 1px solid #ddd;
+}
+
+.audit-section {
+    margin-bottom: 15px;
+}
+
+.audit-section:last-child {
+    margin-bottom: 0;
+}
+
+.audit-section h4 {
+    margin: 0 0 10px 0;
+    color: #c62828;
+    font-size: 1rem;
+}
+
+.audit-section pre {
+    background: #fff;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    overflow-x: auto;
+    margin: 0;
+}
+
+.audit-section code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+

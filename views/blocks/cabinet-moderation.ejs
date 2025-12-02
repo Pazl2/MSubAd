@@ -133,3 +133,46 @@
     </div>
   </div>
 </div>
+
+<!-- Audit Logs Management -->
+<div id="manageAuditLogsMode" style="display: none;">
+  <div class="cabinet-info-large">
+    <div class="button-download-wrapper">
+      <button type="button" class="download-button" onclick="downloadAuditLogs()">
+        <span class="download-icon">📥</span>Скачать историю
+      </button>
+    </div>
+
+    <div class="info-section">
+      <h3>Фильтры</h3>
+      <div class="form-group">
+        <label class="form-label">Фильтр по таблице:</label>
+        <select id="auditTableFilter" class="form-select" onchange="filterAuditLogs()">
+          <option value="">Все таблицы</option>
+          <option value="users">Пользователи</option>
+          <option value="ad_types">Типы рекламы</option>
+          <option value="ad_spaces">Рекламные места</option>
+          <option value="templates">Шаблоны</option>
+        </select>
+
+        <label class="form-label">Фильтр по операции:</label>
+        <select id="auditOperationFilter" class="form-select" onchange="filterAuditLogs()">
+          <option value="">Все операции</option>
+          <option value="INSERT">INSERT (Добавление)</option>
+          <option value="UPDATE">UPDATE (Изменение)</option>
+          <option value="DELETE">DELETE (Удаление)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h3>История изменений</h3>
+      <div id="auditLogsList" class="audit-logs-list"></div>
+      <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+        <button class="confirm-button" id="prevPageBtn" onclick="prevAuditPage()" disabled>← Предыдущая</button>
+        <span id="pageInfo" style="align-self: center; font-weight: 600;">Страница 1</span>
+        <button class="confirm-button" id="nextPageBtn" onclick="nextAuditPage()">Следующая →</button>
+      </div>
+    </div>
+  </div>
+</div>
