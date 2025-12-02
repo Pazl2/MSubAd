@@ -78,7 +78,7 @@ function renderCheckTemplates(templates, status) {
     if (template.AdType) {
       adTypeName = template.AdType.name;
       adTypeLocation = template.AdType.location ? 'Поезд' : 'Станция';
-      adTypeSize = `${template.AdType.width}x${template.AdType.height}px`;
+      adTypeSize = `${template.AdType.width}x${template.AdType.height} мм`;
 
       const width = parseInt(template.AdType.width) || 100;
       const height = parseInt(template.AdType.height) || 50;
@@ -97,7 +97,7 @@ function renderCheckTemplates(templates, status) {
     let imageHtml = '';
     if (template.content_url) {
       imageHtml = `
-        <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px; margin: 0 auto;">
+        <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм; margin: 0 auto;">
           <img src="${template.content_url}" alt="Template" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
       `;

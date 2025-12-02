@@ -68,10 +68,21 @@ function showAccount() {
   updateNavLink('account');
 }
 
-// Инициализация шаблона при загрузке страницы из каталога
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
   initializeAdTypes();
-  showCreateTemplate();
+  
+  // Проверяем, пришли ли мы из каталога
+  const selectedAdType = sessionStorage.getItem('selectedAdType');
+  
+  if (selectedAdType) {
+    // Если из каталога - показываем создание шаблона
+    sessionStorage.removeItem('selectedAdType');
+    showCreateTemplate();
+  } else {
+    // Если просто открыли кабинет - показываем аккаунт
+    showAccount();
+  }
 });
 
 function fillTemplateForm(adType) {

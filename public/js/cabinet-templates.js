@@ -189,13 +189,14 @@ function updateTemplatePreview() {
       <svg width="${displayWidth}" height="${displayHeight}" viewBox="0 0 ${width} ${height}" style="background:#f5f5f5;border-radius:6px;">
         <rect x="0" y="0" width="${width}" height="${height}" rx="8" fill="#fdecea" stroke="#c62828" stroke-width="2"/>
         <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="#c62828" font-family="Segoe UI, Arial" font-weight="bold">${sizeText}</text>
+        <text x="80%" y="80%" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="#c62828" font-family="Segoe UI, Arial" font-weight="bold">мм</text>
       </svg>
     `;
   } else {
     const reader = new FileReader();
     reader.onload = (e) => {
       previewDiv.innerHTML = `
-        <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px;">
+        <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм;">
           <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
       `;
@@ -341,7 +342,7 @@ function renderTemplateCard(template, container, status, isModeration) {
     if (adType) {
       adTypeName = adType.name;
       adTypeLocation = adType.location ? 'Поезд' : 'Станция';
-      adTypeSize = `${adType.width}x${adType.height}px`;
+      adTypeSize = `${adType.width}x${adType.height} мм`;
 
       const width = parseInt(adType.width) || 100;
       const height = parseInt(adType.height) || 50;
@@ -361,7 +362,7 @@ function renderTemplateCard(template, container, status, isModeration) {
   let imageHtml = '';
   if (template.content_url) {
     imageHtml = `
-      <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px; margin: 0 auto;">
+      <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм; margin: 0 auto;">
         <img src="${template.content_url}" alt="Template" style="width: 100%; height: 100%; object-fit: cover;">
       </div>
     `;
@@ -633,14 +634,14 @@ function renderTemplates(templates, status) {
       </div>
       
       <div class="template-item-content">
-        <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px;">
+        <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм;">
           <img src="${escapeHtml(template.content_url)}" alt="Preview" onerror="this.src='/images/placeholder.png'">
         </div>
       </div>
       
       <div class="template-item-info">
         <p><strong>Тип:</strong> ${escapeHtml(template.AdType ? template.AdType.name : 'Неизвестно')}</p>
-        <p><strong>Размер:</strong> ${template.AdType ? template.AdType.width + 'x' + template.AdType.height + 'px' : 'Неизвестно'}</p>
+        <p><strong>Размер:</strong> ${template.AdType ? template.AdType.width + 'x' + template.AdType.height + ' мм' : 'Неизвестно'}</p>
         <p><strong>Локация:</strong> ${template.AdType ? (template.AdType.location ? 'Поезд' : 'Станция') : 'Неизвестно'}</p>
         <p><strong>Дата загрузки:</strong> ${new Date(template.upload_date).toLocaleString('ru-RU')}</p>
         ${template.approval_date ? `<p><strong>Дата проверки:</strong> ${new Date(template.approval_date).toLocaleString('ru-RU')}</p>` : ''}

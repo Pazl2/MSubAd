@@ -145,4 +145,13 @@ router.get('/get-trains', async (req, res) => {
   }
 });
 
+// New route for order redirect
+router.get('/order', (req, res) => {
+  if (!req.session.user) {
+    req.flash('error', 'Требуется авторизация');
+    return res.redirect('/login');
+  }
+  res.redirect('/cabinet');
+});
+
 module.exports = router;

@@ -265,8 +265,8 @@ router.get('/cabinet/download-ad-types', ensureAuthenticated, async (req, res) =
       { header: 'ID', key: 'id', width: 10 },
       { header: 'Название', key: 'name', width: 20 },
       { header: 'Описание', key: 'description', width: 30 },
-      { header: 'Ширина (px)', key: 'width', width: 15 },
-      { header: 'Высота (px)', key: 'height', width: 15 },
+      { header: 'Ширина (мм)', key: 'width', width: 15 },
+      { header: 'Высота (мм)', key: 'height', width: 15 },
       { header: 'Локация', key: 'location', width: 15 },
       { header: 'Базовая цена', key: 'base_price', width: 15 }
     ];

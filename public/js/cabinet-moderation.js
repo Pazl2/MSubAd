@@ -130,7 +130,7 @@ function loadAdTypes() {
             <div class="ad-type-info">
               <h4>${adType.name}</h4>
               <p><strong>Описание:</strong> ${adType.description}</p>
-              <p><strong>Размер:</strong> ${adType.width}x${adType.height}px</p>
+              <p><strong>Размер:</strong> ${adType.width}x${adType.height} мм</p>
               <p><strong>Локация:</strong> ${adType.location ? 'Поезд' : 'Станция'}</p>
               <p><strong>Базовая цена:</strong> ${adType.base_price} Br</p>
             </div>

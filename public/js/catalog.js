@@ -46,6 +46,7 @@ class CatalogManager {
       if (stationBtn){
         const sid = stationBtn.getAttribute('data-station-id');
         if(sid) this.loadStation(sid);
+        return;
       }
       const orderBtn = e.target.closest('.order-btn');
       if (orderBtn) {
@@ -104,6 +105,8 @@ class CatalogManager {
             <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="background:#f5f5f5;border-radius:6px;">
               <rect x="0" y="0" width="${svgW}" height="${svgH}" rx="8" fill="#fdecea" stroke="#c62828" stroke-width="2"/>
               <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="18" fill="#c62828" font-family="Segoe UI, Arial" font-weight="bold">${sizeText}</text>
+              <text x="80%" y="80%" dominant-baseline="middle" text-anchor="middle" font-size="18" fill="#c62828" font-family="Segoe UI, Arial" font-weight="bold">мм</text>
+
             </svg>
           </div>
         `;
@@ -250,7 +253,13 @@ class CatalogManager {
   }
 
   orderAd(adTypeId, adTypeName) {
-    // Просто перенаправляем в кабинет на создание шаблона
+    // Сохраняем данные в sessionStorage
+    sessionStorage.setItem('selectedAdType', JSON.stringify({
+      id: parseInt(adTypeId),
+      name: adTypeName
+    }));
+    
+    // Перенаправляем в кабинет
     window.location.href = '/cabinet';
   }
 }
