@@ -1010,4 +1010,290 @@ router.post('/cabinet/subtract-user-balance', ensureAuthenticated, async (req, r
   }
 });
 
+router.get('/cabinet/get-approved-templates', ensureAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+
+    const templates = await Template.findAll({
+      where: {
+        user_id: userId,
+        approval_status: 'approved'
+      },
+      include: [
+        { model: AdType, attributes: ['id', 'name', 'location', 'width', 'height', 'base_price'], as: 'AdType' }
+      ],
+      raw: false
+    });
+
+    res.json({ success: true, templates });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.get('/cabinet/get-available-lines', ensureAuthenticated, async (req, res) => {
+  try {
+    const location = req.query.location === '1' ? true : false;
+    const { AdSpace, Train, MetroStation } = require('../models');
+
+    console.log('=== GET AVAILABLE LINES ===');
+    console.log('Location (is_train):', location);
+
+    // Получаем все доступные места
+    const availableSpaces = await AdSpace.findAll({
+      where: { availability: true },
+      attributes: ['id', 'train_id', 'station_id', 'type_id'],
+      raw: true
+    });
+
+    console.log('Total available spaces:', availableSpaces.length);
+    console.log('Sample spaces:', availableSpaces.slice(0, 5));
+
+    let lineIds = new Set();
+
+    if (location) {
+      // Для поездов получаем линии через таблицу trains
+      const trainIds = availableSpaces
+        .map(a => a.train_id)
+        .filter(id => id !== null && id !== undefined);
+      
+      console.log('Train IDs from available spaces:', trainIds);
+
+      if (trainIds.length > 0) {
+        const trains = await Train.findAll({
+          where: { id: trainIds },
+          attributes: ['id', 'line_id'],
+          raw: true
+        });
+
+        console.log('Found trains:', trains);
+
+        trains.forEach(t => {
+          if (t.line_id) lineIds.add(t.line_id);
+        });
+      }
+    } else {
+      // Для станций получаем линии через таблицу metrostations
+      const stationIds = availableSpaces
+        .map(a => a.station_id)
+        .filter(id => id !== null && id !== undefined);
+      
+      console.log('Station IDs from available spaces:', stationIds);
+
+      if (stationIds.length > 0) {
+        const stations = await MetroStation.findAll({
+          where: { id: stationIds },
+          attributes: ['id', 'line_id'],
+          raw: true
+        });
+
+        console.log('Found stations:', stations);
+
+        stations.forEach(s => {
+          if (s.line_id) lineIds.add(s.line_id);
+        });
+      }
+    }
+
+    const resultLines = Array.from(lineIds);
+    console.log('Result line IDs:', resultLines);
+
+    res.json({ success: true, lines: resultLines });
+  } catch (err) {
+    console.error('Error in get-available-lines:', err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/create-order', ensureAuthenticated, async (req, res) => {
+  try {
+    const { template_id, line_id, station_id, days, total_price } = req.body;
+    const userId = req.session.user.id;
+    const { Rental } = require('../models');
+
+    // Проверяем, что шаблон принадлежит пользователю и одобрен
+    const template = await Template.findOne({
+      where: { id: template_id, user_id: userId, approval_status: 'approved' }
+    });
+
+    if (!template) {
+      return res.json({ success: false, message: 'Шаблон не найден или не одобрен' });
+    }
+
+    // Получаем доступное место
+    let adSpace;
+    if (station_id) {
+      adSpace = await AdSpace.findOne({
+        where: { 
+          type_id: template.type_id,
+          station_id: station_id,
+          availability: true
+        }
+      });
+    } else {
+      adSpace = await AdSpace.findOne({
+        where: { 
+          type_id: template.type_id,
+          train_id: { [Op.ne]: null },
+          availability: true
+        },
+        include: [{ model: require('../models').Train, where: { line_id: line_id } }]
+      });
+    }
+
+    if (!adSpace) {
+      return res.json({ success: false, message: 'Доступное место не найдено' });
+    }
+
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + days);
+
+    const contractNumber = `CNT-${Date.now()}`;
+
+    const rental = await Rental.create({
+      space_id: adSpace.id,
+      ad_id: template_id,
+      start_date: startDate,
+      end_date: endDate,
+      total_price: total_price,
+      status: 'pending',
+      contract_number: contractNumber
+    });
+
+    res.json({ success: true, message: 'Заказ создан', rental });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.get('/cabinet/get-orders', ensureAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const status = req.query.status || 'pending';
+    const { Rental } = require('../models');
+
+    console.log('=== GET ORDERS ===');
+    console.log('User ID:', userId);
+    console.log('Status:', status);
+
+    const orders = await Rental.findAll({
+      where: { status: status },
+      include: [
+        {
+          model: Template,
+          as: 'Advertisement',
+          where: { user_id: userId },
+          attributes: ['id', 'ad_title', 'type_id', 'content_url'],
+          required: true
+        },
+        { 
+          model: AdSpace, 
+          as: 'AdSpace', 
+          attributes: ['id'],
+          required: false
+        }
+      ],
+      attributes: ['id', 'space_id', 'ad_id', 'start_date', 'end_date', 'total_price', 'status', 'contract_number'],
+      order: [['start_date', 'DESC']],
+      raw: false
+    });
+
+    console.log('Found orders:', orders.length);
+    orders.forEach((o, idx) => {
+      console.log(`Order ${idx}:`, {
+        id: o.id,
+        status: o.status,
+        contract: o.contract_number,
+        hasAdvertisement: !!o.Advertisement,
+        template: o.Advertisement ? { id: o.Advertisement.id, title: o.Advertisement.ad_title } : null
+      });
+    });
+
+    res.json({ success: true, orders });
+  } catch (err) {
+    console.error('Error in get-orders:', err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/pay-order', ensureAuthenticated, async (req, res) => {
+  try {
+    const { orderId, amount } = req.body;
+    const userId = req.session.user.id;
+    const { Rental } = require('../models');
+
+    console.log('=== PAY ORDER ===');
+    console.log('Order ID:', orderId);
+    console.log('Amount:', amount);
+    console.log('User ID:', userId);
+
+    // Получаем заказ
+    const order = await Rental.findOne({
+      where: { id: orderId },
+      include: [
+        {
+          model: Template,
+          as: 'Advertisement',
+          where: { user_id: userId },
+          required: true
+        }
+      ]
+    });
+
+    if (!order) {
+      return res.json({ success: false, message: 'Заказ не найден' });
+    }
+
+    if (order.status !== 'pending') {
+      return res.json({ success: false, message: 'Этот заказ уже был оплачен' });
+    }
+
+    // Получаем пользователя
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.json({ success: false, message: 'Пользователь не найден' });
+    }
+
+    const userBalance = parseFloat(user.balance);
+    const orderAmount = parseFloat(amount);
+
+    // Проверяем баланс
+    if (userBalance < orderAmount) {
+      return res.json({ 
+        success: false, 
+        message: `Недостаточно средств. Баланс: ${userBalance.toFixed(2)} BYN, требуется: ${orderAmount.toFixed(2)} BYN` 
+      });
+    }
+
+    // Списываем средства
+    const newBalance = userBalance - orderAmount;
+    await user.update({ balance: newBalance });
+
+    // Обновляем статус заказа на активный
+    await order.update({ status: 'active' });
+
+    // Отмечаем место как занятое
+    const adSpace = await AdSpace.findByPk(order.space_id);
+    if (adSpace) {
+      await adSpace.update({ availability: false });
+    }
+
+    console.log('Order paid successfully');
+    console.log('New user balance:', newBalance);
+
+    res.json({ 
+      success: true, 
+      message: 'Оплата успешно произведена',
+      newBalance: newBalance.toFixed(2),
+      orderId: orderId
+    });
+  } catch (err) {
+    console.error('Error in pay-order:', err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
 module.exports = router;

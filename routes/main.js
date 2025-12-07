@@ -5,4 +5,8 @@ router.get('/', (req, res) => {
   res.render('home', { title: 'MSubAd' });
 });
 
+router.get('/about', (req, res) => {
+  res.render('about', { title: 'О нас — MSubAd' });
+});
+
 module.exports = router;

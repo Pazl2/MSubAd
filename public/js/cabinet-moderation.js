@@ -7,6 +7,7 @@ function showManageUsers() {
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'none';
   document.getElementById('manageAuditLogsMode').style.display = 'none';
+  document.getElementById('manageOrderAdMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Управление пользователями';
   updateNavLink('manage-users');
   clearAdTypeForm();
@@ -21,6 +22,7 @@ function showManageAdTypes() {
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'none';
   document.getElementById('manageAuditLogsMode').style.display = 'none';
+  document.getElementById('manageOrderAdMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Управление типами рекламы';
   updateNavLink('manage-ad-types');
   loadAdTypes();
@@ -35,6 +37,7 @@ function showManageAdSpaces() {
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'none';
   document.getElementById('manageAuditLogsMode').style.display = 'none';
+  document.getElementById('manageOrderAdMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Управление рекламными местами';
   updateNavLink('manage-ad-spaces');
   loadAdSpacesOptions();
@@ -714,6 +717,7 @@ function showManageAuditLogs() {
   document.getElementById('manageAdSpacesMode').style.display = 'none';
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'none';
+  document.getElementById('manageOrderAdMode').style.display = 'none';
   document.getElementById('manageAuditLogsMode').style.display = 'block';
   document.getElementById('pageTitle').textContent = 'История изменений';
   

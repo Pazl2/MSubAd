@@ -1,0 +1,83 @@
+<!-- Order Ad Management -->
+<div id="manageOrderAdMode" style="display: none;">
+  <div class="cabinet-info-large">
+    <div class="tabs-wrapper">
+      <div class="tabs-header">
+        <button class="tab-button active" onclick="switchOrderAdTab('create')">Сделать заказ</button>
+        <button class="tab-button" onclick="switchOrderAdTab('pending')">Ожидающие оплаты</button>
+        <button class="tab-button" onclick="switchOrderAdTab('active')">Активные</button>
+        <button class="tab-button" onclick="switchOrderAdTab('completed')">Завершенные</button>
+      </div>
+
+      <!-- Create Order Tab -->
+      <div id="order-create-tab" class="tab-content active">
+        <div class="info-section">
+          <h3>Ваши одобренные шаблоны</h3>
+          <div id="orderTemplatesList" class="templates-list" style="display: flex; flex-wrap: wrap; justify-content: space-between;"></div>
+        </div>
+      </div>
+
+      <!-- Pending Tab -->
+      <div id="order-pending-tab" class="tab-content">
+        <div class="info-section">
+          <h3>Ожидающие оплаты</h3>
+          <div id="orderPendingList" class="templates-list" style="display: flex; flex-wrap: wrap; justify-content: space-between;"></div>
+        </div>
+      </div>
+
+      <!-- Active Tab -->
+      <div id="order-active-tab" class="tab-content">
+        <div class="info-section">
+          <h3>Активные</h3>
+          <div id="orderActiveList" class="templates-list" style="display: flex; flex-wrap: wrap; justify-content: space-between;"></div>
+        </div>
+      </div>
+
+      <!-- Completed Tab -->
+      <div id="order-completed-tab" class="tab-content">
+        <div class="info-section">
+          <h3>Завершенные</h3>
+          <div id="orderCompletedList" class="templates-list" style="display: flex; flex-wrap: wrap; justify-content: space-between;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div id="orderModal" class="modal" style="display: none;">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3>Заказать рекламу</h3>
+      <button class="modal-close" onclick="closeOrderModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Линия метро:</label>
+        <select id="orderLine" class="form-select" onchange="updateOrderStations()">
+          <option value="">Выберите линию</option>
+        </select>
+
+        <label class="form-label" id="orderStationLabel" style="display: none;">Станция:</label>
+        <select id="orderStation" class="form-select" style="display: none;" onchange="updateOrderPrice()">
+          <option value="">Выберите станцию</option>
+        </select>
+
+        <label class="form-label">Период размещения (дней):</label>
+        <input type="number" id="orderDays" class="form-input" placeholder="Введите количество дней" min="1" value="30" onchange="updateOrderPrice()">
+
+        <div class="order-price-info">
+          <p><strong>Базовая цена:</strong> <span id="orderBasePrice">0.00</span> BYN</p>
+          <p><strong>Коэффициент:</strong> <span id="orderCoefficient">1.00</span></p>
+          <p style="font-size: 1.1rem; color: #c62828;"><strong>Итого:</strong> <span id="orderTotalPrice">0.00</span> BYN</p>
+        </div>
+
+        <span class="error-message" id="orderError"></span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="confirm-button" onclick="submitOrder()">Заказать</button>
+      <button class="cancel-button" onclick="closeOrderModal()">Отмена</button>
+    </div>
+  </div>
+</div>

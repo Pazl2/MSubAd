@@ -7,6 +7,7 @@ function showCheckTemplates() {
   document.getElementById('manageAdTypesMode').style.display = 'none';
   document.getElementById('manageAdSpacesMode').style.display = 'none';
   document.getElementById('manageTemplatesMode').style.display = 'none';
+  document.getElementById('manageOrderAdMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'block';
   document.getElementById('manageAuditLogsMode').style.display = 'none';
   

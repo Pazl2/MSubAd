@@ -154,4 +154,56 @@ router.get('/order', (req, res) => {
   res.redirect('/cabinet');
 });
 
+router.get('/get-stations-with-availability', async (req, res) => {
+  try {
+    const lineId = parseInt(req.query.line_id);
+    const { MetroStation, AdSpace } = require('../models');
+
+    console.log('=== GET STATIONS WITH AVAILABILITY ===');
+    console.log('Line ID:', lineId);
+
+    if (!lineId || isNaN(lineId)) {
+      return res.json({ success: false, message: 'Line ID не указан' });
+    }
+
+    // Получаем все станции на этой линии
+    const stations = await MetroStation.findAll({
+      where: { line_id: lineId },
+      raw: true
+    });
+
+    console.log('Found stations on line:', stations.length);
+
+    if (stations.length === 0) {
+      return res.json({ success: true, stations: [] });
+    }
+
+    // Для каждой станции проверяем наличие доступных мест
+    const stationsWithAvailability = [];
+    
+    for (const station of stations) {
+      const availableCount = await AdSpace.count({
+        where: {
+          station_id: station.id,
+          availability: true
+        }
+      });
+
+      console.log(`Station ${station.id} (${station.name}): ${availableCount} available spaces`);
+
+      // Добавляем только если есть доступные места
+      if (availableCount > 0) {
+        stationsWithAvailability.push(station);
+      }
+    }
+
+    console.log('Stations with availability:', stationsWithAvailability.length);
+
+    res.json({ success: true, stations: stationsWithAvailability });
+  } catch (err) {
+    console.error('Error in get-stations-with-availability:', err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
 module.exports = router;

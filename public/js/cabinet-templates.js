@@ -20,6 +20,7 @@ function showCreateTemplate() {
   document.getElementById('manageTemplatesMode').style.display = 'block';
   document.getElementById('checkTemplatesMode').style.display = 'none';
   document.getElementById('manageAuditLogsMode').style.display = 'none';
+  document.getElementById('manageOrderAdMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Создать шаблон';
   updateNavLink('create-template');
   loadTemplateAdTypes();
@@ -35,6 +36,7 @@ function showCheckTemplates() {
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'block';
   document.getElementById('manageAuditLogsMode').style.display = 'none';
+  document.getElementById('manageOrderAdMode').style.display = 'none';
   document.getElementById('pageTitle').textContent = 'Проверка рекламы';
   updateNavLink('check-templates');
   loadCheckTemplates();
@@ -575,19 +577,18 @@ function getStatusText(status) {
 }
 
 function updateNavLink(page) {
-  // Убираем активный класс со всех ссылок в навигации
   const allLinks = document.querySelectorAll('.cabinet-nav .nav-link');
   allLinks.forEach(link => link.classList.remove('active'));
   
-  // Активируем нужную ссылку в зависимости от страницы
   if (page === 'account') {
-    // Первая ссылка - Аккаунт
     const links = document.querySelectorAll('.cabinet-nav .nav-menu .nav-item .nav-link');
     if (links[0]) links[0].classList.add('active');
   } else if (page === 'create-template') {
-    // Вторая ссылка - Создать шаблон
     const links = document.querySelectorAll('.cabinet-nav .nav-menu .nav-item .nav-link');
     if (links[1]) links[1].classList.add('active');
+  } else if (page === 'order-ad') {
+    const links = document.querySelectorAll('.cabinet-nav .nav-menu .nav-item .nav-link');
+    if (links[2]) links[2].classList.add('active');
   } else if (page === 'manage-users') {
     const manageUsersLink = Array.from(allLinks).find(link => 
       link.textContent.trim().includes('Управление пользователями')

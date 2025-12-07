@@ -57,7 +57,6 @@ function saveChanges(event) {
 }
 
 function showAccount() {
-  // Скрываем все разделы модерации
   document.getElementById('viewMode').style.display = 'block';
   document.getElementById('editMode').style.display = 'none';
   document.getElementById('manageUsersMode').style.display = 'none';
@@ -66,6 +65,7 @@ function showAccount() {
   document.getElementById('manageTemplatesMode').style.display = 'none';
   document.getElementById('checkTemplatesMode').style.display = 'none';
   document.getElementById('manageAuditLogsMode').style.display = 'none';
+  document.getElementById('manageOrderAdMode').style.display = 'none';
   
   document.getElementById('pageTitle').textContent = 'Личный кабинет';
   updateNavLink('account');
