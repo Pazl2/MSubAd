@@ -71,6 +71,27 @@ body{
     font-weight: 600;
 }
 
+.user-welcome-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-balance {
+  font-size: 1rem;
+  color: #333;
+  background: #f0f0f0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border-left: 4px solid #c62828;
+  font-weight: 600;
+}
+
+.user-balance strong {
+  color: #c62828;
+  font-size: 1.1rem;
+}
+
 .moder-badge {
     background: #c62828;
     color: #fff;

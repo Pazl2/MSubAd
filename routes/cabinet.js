@@ -923,4 +923,91 @@ router.get('/cabinet/download-audit-logs', ensureAuthenticated, async (req, res)
   }
 });
 
+router.post('/cabinet/change-user-balance', ensureAuthenticated, async (req, res) => {
+  try {
+    const { username, balance } = req.body;
+    const moderatorUsername = req.session.user.username;
+
+    // Проверяем, является ли текущий пользователь модератором
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.json({ success: false, message: 'Пользователь не найден' });
+    }
+
+    const newBalance = parseFloat(balance);
+    if (isNaN(newBalance)) {
+      return res.json({ success: false, message: 'Некорректное значение баланса' });
+    }
+
+    await user.update({ balance: newBalance });
+    res.json({ success: true, message: `Баланс пользователя изменен на ${newBalance}` });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/add-user-balance', ensureAuthenticated, async (req, res) => {
+  try {
+    const { username, amount } = req.body;
+    const moderatorUsername = req.session.user.username;
+
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.json({ success: false, message: 'Пользователь не найден' });
+    }
+
+    const newBalance = parseFloat(user.balance) + parseFloat(amount);
+    await user.update({ balance: newBalance });
+    res.json({ success: true, message: `Добавлено ${amount} BYN. Новый баланс: ${newBalance.toFixed(2)} BYN` });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+router.post('/cabinet/subtract-user-balance', ensureAuthenticated, async (req, res) => {
+  try {
+    const { username, amount } = req.body;
+    const moderatorUsername = req.session.user.username;
+
+    const moderator = await User.findOne({ where: { username: moderatorUsername } });
+    if (!moderator || !moderator.is_moder) {
+      return res.json({ success: false, message: 'Доступ запрещен' });
+    }
+
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.json({ success: false, message: 'Пользователь не найден' });
+    }
+
+    const currentBalance = parseFloat(user.balance);
+    const subtractAmount = parseFloat(amount);
+
+    if (currentBalance < subtractAmount) {
+      return res.json({ 
+        success: false, 
+        message: `Недостаточно средств. Текущий баланс: ${currentBalance.toFixed(2)} BYN, требуется: ${subtractAmount.toFixed(2)} BYN` 
+      });
+    }
+
+    const newBalance = currentBalance - subtractAmount;
+    await user.update({ balance: newBalance });
+    res.json({ success: true, message: `Вычтено ${subtractAmount.toFixed(2)} BYN. Новый баланс: ${newBalance.toFixed(2)} BYN` });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
 module.exports = router;

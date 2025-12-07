@@ -10,6 +10,7 @@ const Train = require('./trains')(sequelize, DataTypes);
 const AdSpace = require('./adSpace')(sequelize, DataTypes);
 const Template = require('./template')(sequelize, DataTypes);
 const AuditLog = require('./auditLog')(sequelize, DataTypes);
+const Rental = require('./rental')(sequelize, DataTypes);
 
 // Associations
 Line.hasMany(MetroStation, { foreignKey: 'line_id' });
@@ -34,6 +35,16 @@ AdType.hasMany(Template, { foreignKey: 'type_id' });
 Template.belongsTo(User, { foreignKey: 'user_id', as: 'User' });
 User.hasMany(Template, { foreignKey: 'user_id' });
 
+Template.belongsTo(User, { foreignKey: 'moder_id', as: 'Moder' });
+User.hasMany(Template, { foreignKey: 'moder_id' });
+
+// Rental associations
+Rental.belongsTo(AdSpace, { foreignKey: 'space_id', as: 'AdSpace' });
+AdSpace.hasMany(Rental, { foreignKey: 'space_id' });
+
+Rental.belongsTo(Template, { foreignKey: 'ad_id', as: 'Advertisement' });
+Template.hasMany(Rental, { foreignKey: 'ad_id' });
+
 module.exports = {
   sequelize,
   Sequelize,
@@ -44,5 +55,6 @@ module.exports = {
   Train,
   AdSpace,
   Template,
-  AuditLog
+  AuditLog,
+  Rental
 };

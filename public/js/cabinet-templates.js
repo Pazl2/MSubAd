@@ -198,7 +198,7 @@ function updateTemplatePreview() {
     const reader = new FileReader();
     reader.onload = (e) => {
       previewDiv.innerHTML = `
-        <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм;">
+        <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px; margin: 0 auto;">
           <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
       `;
@@ -350,13 +350,19 @@ function renderTemplateCard(template, container, status, isModeration) {
       const height = parseInt(adType.height) || 50;
       const aspectRatio = width / height;
 
-      const maxSize = 550;
-      if (width > height) {
-        displayWidth = maxSize;
-        displayHeight = maxSize / aspectRatio;
+      // Максимальный размер контейнера
+      const maxContainerWidth = 400;
+      const maxContainerHeight = 300;
+      
+      // Масштабируем с сохранением пропорций
+      if (aspectRatio > maxContainerWidth / maxContainerHeight) {
+        // Ширина больше
+        displayWidth = maxContainerWidth;
+        displayHeight = maxContainerWidth / aspectRatio;
       } else {
-        displayHeight = maxSize;
-        displayWidth = maxSize * aspectRatio;
+        // Высота больше
+        displayHeight = maxContainerHeight;
+        displayWidth = maxContainerHeight * aspectRatio;
       }
     }
   }
@@ -364,7 +370,7 @@ function renderTemplateCard(template, container, status, isModeration) {
   let imageHtml = '';
   if (template.content_url) {
     imageHtml = `
-      <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм; margin: 0 auto;">
+      <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px; margin: 0 auto;">
         <img src="${template.content_url}" alt="Template" style="width: 100%; height: 100%; object-fit: cover;">
       </div>
     `;
@@ -660,26 +666,34 @@ document.addEventListener('DOMContentLoaded', function() {
           const img = new Image();
           img.src = e.target.result;
           img.onload = () => {
-            const width = img.width;
-            const height = img.height;
-            const aspectRatio = width / height;
+            // Получаем размеры типа рекламы
+            const typeSelect = document.getElementById('templateAdType');
+            const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+            const adTypeWidth = parseInt(selectedOption.dataset.width) || 100;
+            const adTypeHeight = parseInt(selectedOption.dataset.height) || 50;
+            const adTypeAspectRatio = adTypeWidth / adTypeHeight;
 
-            const maxWidth = 800;
-            const maxHeight = 800;
+            // Контейнер для предпросмотра
+            const containerSize = 700;
+            const maxSize = containerSize * (2/3);
+            
             let displayWidth, displayHeight;
 
-            if (width > height) {
-              displayWidth = maxWidth;
-              displayHeight = maxWidth / aspectRatio;
+            // Масштабируем согласно пропорциям типа рекламы
+            if (adTypeAspectRatio > 1) {
+              // Ширина больше высоты
+              displayWidth = maxSize;
+              displayHeight = maxSize / adTypeAspectRatio;
             } else {
-              displayHeight = maxHeight;
-              displayWidth = maxHeight * aspectRatio;
+              // Высота больше ширины
+              displayHeight = maxSize;
+              displayWidth = maxSize * adTypeAspectRatio;
             }
 
             const previewDiv = document.getElementById('templatePreview');
             previewDiv.innerHTML = `
-              <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм;">
-                <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+              <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px; margin: 0 auto; overflow: hidden; border-radius: 8px; background: #f5f5f5;">
+                <img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; display: block;">
               </div>
             `;
           };

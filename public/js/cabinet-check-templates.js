@@ -86,20 +86,26 @@ function renderCheckTemplates(templates, status) {
       const height = parseInt(template.AdType.height) || 50;
       const aspectRatio = width / height;
 
-      const maxSize = 550;
-      if (width > height) {
-        displayWidth = maxSize;
-        displayHeight = maxSize / aspectRatio;
+      // Максимальный размер контейнера
+      const maxContainerWidth = 400;
+      const maxContainerHeight = 300;
+      
+      // Масштабируем с сохранением пропорций
+      if (aspectRatio > maxContainerWidth / maxContainerHeight) {
+        // Ширина больше
+        displayWidth = maxContainerWidth;
+        displayHeight = maxContainerWidth / aspectRatio;
       } else {
-        displayHeight = maxSize;
-        displayWidth = maxSize * aspectRatio;
+        // Высота больше
+        displayHeight = maxContainerHeight;
+        displayWidth = maxContainerHeight * aspectRatio;
       }
     }
 
     let imageHtml = '';
     if (template.content_url) {
       imageHtml = `
-        <div class="template-preview-image-container" style="width: ${displayWidth} мм; height: ${displayHeight} мм; margin: 0 auto;">
+        <div class="template-preview-image-container" style="width: ${displayWidth}px; height: ${displayHeight}px; margin: 0 auto;">
           <img src="${template.content_url}" alt="Template" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
       `;

@@ -23,6 +23,22 @@
     </div>
 
     <div class="info-section">
+      <h3>Изменить баланс</h3>
+      <div class="form-group">
+        <label class="form-label">Логин пользователя:</label>
+        <input type="text" id="changeBalanceUsername" class="form-input" placeholder="Введите логин">
+        <label class="form-label">Сумма (BYN):</label>
+        <input type="number" id="balanceInput" class="form-input" placeholder="Введите сумму" step="0.01" min="0">
+        <div class="button-group">
+          <button type="button" class="confirm-button" onclick="addUserBalance()">Добавить</button>
+          <button type="button" class="confirm-button" onclick="subtractUserBalance()">Отнять</button>
+          <button type="button" class="confirm-button" onclick="setUserBalance()">Установить</button>
+        </div>
+        <span class="error-message" id="changeBalanceError"></span>
+      </div>
+    </div>
+
+    <div class="info-section">
       <h3>Удалить пользователя</h3>
       <div class="form-group">
         <label class="form-label">Логин пользователя:</label>

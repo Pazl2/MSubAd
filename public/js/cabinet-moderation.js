@@ -591,6 +591,120 @@ function deleteUser() {
     });
 }
 
+function addUserBalance() {
+  const username = document.getElementById('changeBalanceUsername').value.trim();
+  const amount = document.getElementById('balanceInput').value.trim();
+  const errorEl = document.getElementById('changeBalanceError');
+  errorEl.textContent = '';
+
+  if (!username) {
+    errorEl.textContent = 'Введите логин пользователя';
+    return;
+  }
+
+  if (!amount || isNaN(amount) || parseFloat(amount) < 0) {
+    errorEl.textContent = 'Введите корректное значение суммы';
+    return;
+  }
+
+  fetch('/cabinet/add-user-balance', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, amount: parseFloat(amount) })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        document.getElementById('changeBalanceUsername').value = '';
+        document.getElementById('balanceInput').value = '';
+        location.reload();
+      } else {
+        errorEl.textContent = data.message;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      errorEl.textContent = 'Ошибка сервера';
+    });
+}
+
+function subtractUserBalance() {
+  const username = document.getElementById('changeBalanceUsername').value.trim();
+  const amount = document.getElementById('balanceInput').value.trim();
+  const errorEl = document.getElementById('changeBalanceError');
+  errorEl.textContent = '';
+
+  if (!username) {
+    errorEl.textContent = 'Введите логин пользователя';
+    return;
+  }
+
+  if (!amount || isNaN(amount) || parseFloat(amount) < 0) {
+    errorEl.textContent = 'Введите корректное значение суммы';
+    return;
+  }
+
+  fetch('/cabinet/subtract-user-balance', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, amount: parseFloat(amount) })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        document.getElementById('changeBalanceUsername').value = '';
+        document.getElementById('balanceInput').value = '';
+        location.reload();
+      } else {
+        errorEl.textContent = data.message;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      errorEl.textContent = 'Ошибка сервера';
+    });
+}
+
+function setUserBalance() {
+  const username = document.getElementById('changeBalanceUsername').value.trim();
+  const balance = document.getElementById('balanceInput').value.trim();
+  const errorEl = document.getElementById('changeBalanceError');
+  errorEl.textContent = '';
+
+  if (!username) {
+    errorEl.textContent = 'Введите логин пользователя';
+    return;
+  }
+
+  if (!balance || isNaN(balance)) {
+    errorEl.textContent = 'Введите корректное значение баланса';
+    return;
+  }
+
+  fetch('/cabinet/change-user-balance', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, balance: parseFloat(balance) })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        document.getElementById('changeBalanceUsername').value = '';
+        document.getElementById('balanceInput').value = '';
+        location.reload();
+      } else {
+        errorEl.textContent = data.message;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      errorEl.textContent = 'Ошибка сервера';
+    });
+}
+
 function showManageAuditLogs() {
   // Скрываем все остальные разделы
   document.getElementById('viewMode').style.display = 'none';

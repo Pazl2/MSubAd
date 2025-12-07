@@ -24,6 +24,7 @@
                 <% if (user.is_moder) { %>
                     <span class="moder-badge">Модератор</span>
                 <% } %>
+                <span class="user-balance">Баланс: <strong><%= parseFloat(user.balance).toFixed(2) %> BYN</strong></span>
             </div>
         </div>
 
